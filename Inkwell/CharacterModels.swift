@@ -1,0 +1,118 @@
+//
+//  CharacterModels.swift
+//  Inkwell
+//
+
+import Foundation
+
+struct CharacterItem: Identifiable, Codable, Hashable {
+    var id: String { glyph }
+    let glyph: String
+    let meaning: String
+    let reading: String
+}
+
+enum ScriptLanguage: String, Codable {
+    case japanese = "ja"
+    case chinese = "zh"
+    case both = "both"
+}
+
+struct CharacterDeck: Identifiable, Codable, Hashable {
+    let id: String
+    let lang: ScriptLanguage
+    let script: String
+    let level: String
+    let title: String
+    let blurb: String
+    let accentName: String
+    let chars: [CharacterItem]
+    
+    var accentColor: String {
+        switch accentName {
+        case "sun": return "#9a6a2f"
+        case "jade": return "#1f6f6b"
+        default: return "#c8492f" // vermilion / ink
+        }
+    }
+}
+
+// Structs for stroke geometry validation
+struct StrokePoint: Codable, Hashable {
+    let x: Double
+    let y: Double
+}
+
+struct CharacterStrokeData: Codable {
+    let glyph: String
+    let strokes: [String] // SVG path strings
+    let medians: [[StrokePoint]] // Array of median points per stroke in 1024x1024 coordinate space
+}
+
+struct SeedData {
+    static let decks: [CharacterDeck] = [
+        CharacterDeck(
+            id: "jp-n5",
+            lang: .japanese,
+            script: "Japanese",
+            level: "JLPT N5",
+            title: "First Kanji",
+            blurb: "The everyday kanji behind days of the week, nature, and people.",
+            accentName: "sun",
+            chars: [
+                CharacterItem(glyph: "日", meaning: "sun · day", reading: "ニチ / ひ"),
+                CharacterItem(glyph: "月", meaning: "moon · month", reading: "ゲツ / つき"),
+                CharacterItem(glyph: "火", meaning: "fire", reading: "カ / ひ"),
+                CharacterItem(glyph: "水", meaning: "water", reading: "スイ / みず"),
+                CharacterItem(glyph: "木", meaning: "tree · wood", reading: "モク / き"),
+                CharacterItem(glyph: "金", meaning: "gold · money", reading: "キン / かね"),
+                CharacterItem(glyph: "土", meaning: "earth · soil", reading: "ド / つち"),
+                CharacterItem(glyph: "山", meaning: "mountain", reading: "サン / やま"),
+                CharacterItem(glyph: "川", meaning: "river", reading: "セン / かわ"),
+                CharacterItem(glyph: "人", meaning: "person", reading: "ジン / ひと")
+            ]
+        ),
+        CharacterDeck(
+            id: "zh-hsk1",
+            lang: .chinese,
+            script: "Chinese",
+            level: "HSK 1",
+            title: "Essentials",
+            blurb: "Your first ten characters — enough to greet someone and introduce yourself.",
+            accentName: "ink",
+            chars: [
+                CharacterItem(glyph: "你", meaning: "you", reading: "nǐ"),
+                CharacterItem(glyph: "好", meaning: "good · well", reading: "hǎo"),
+                CharacterItem(glyph: "我", meaning: "I · me", reading: "wǒ"),
+                CharacterItem(glyph: "是", meaning: "to be", reading: "shì"),
+                CharacterItem(glyph: "不", meaning: "not · no", reading: "bù"),
+                CharacterItem(glyph: "中", meaning: "middle · center", reading: "zhōng"),
+                CharacterItem(glyph: "国", meaning: "country", reading: "guó"),
+                CharacterItem(glyph: "学", meaning: "to study", reading: "xué"),
+                CharacterItem(glyph: "人", meaning: "person", reading: "rén"),
+                CharacterItem(glyph: "大", meaning: "big · large", reading: "dà")
+            ]
+        ),
+        CharacterDeck(
+            id: "numbers",
+            lang: .both,
+            script: "Chinese · Japanese",
+            level: "Foundations",
+            title: "Numbers 一–十",
+            blurb: "One through ten — shared across both scripts, the perfect warm-up.",
+            accentName: "jade",
+            chars: [
+                CharacterItem(glyph: "一", meaning: "one", reading: "yī / いち"),
+                CharacterItem(glyph: "二", meaning: "two", reading: "èr / に"),
+                CharacterItem(glyph: "三", meaning: "three", reading: "sān / さん"),
+                CharacterItem(glyph: "四", meaning: "four", reading: "sì / よん"),
+                CharacterItem(glyph: "五", meaning: "five", reading: "wǔ / ご"),
+                CharacterItem(glyph: "六", meaning: "six", reading: "liù / ろく"),
+                CharacterItem(glyph: "七", meaning: "seven", reading: "qī / なな"),
+                CharacterItem(glyph: "八", meaning: "eight", reading: "bā / はち"),
+                CharacterItem(glyph: "九", meaning: "nine", reading: "jiǔ / きゅう"),
+                CharacterItem(glyph: "十", meaning: "ten", reading: "shí / じゅう")
+            ]
+        )
+    ]
+}
