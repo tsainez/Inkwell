@@ -1,0 +1,22 @@
+Inkwell — Stroke data attribution
+=================================
+
+The file `StrokeData.json` contains stroke outlines and median (centerline)
+data for the characters used in the practice decks. This data is derived from:
+
+  Make Me a Hanzi / hanzi-writer-data
+  https://github.com/chanind/hanzi-writer-data
+  https://github.com/skishore/makemeahanzi
+
+Licensing:
+  - The character graphics (stroke outlines) are derived from the Arphic
+    PL fonts (AR PL UKai / AR PL UMing) and are distributed under the
+    Arphic Public License (ARPHICPL).
+  - The accompanying data/code is provided under the LGPL / MIT licenses as
+    described by the upstream projects.
+
+Per the Arphic Public License, attribution is retained here and these notices
+must accompany redistribution. See the upstream repositories for full license
+text.
+
+Only the 29 characters required by the bundled practice decks are included.
