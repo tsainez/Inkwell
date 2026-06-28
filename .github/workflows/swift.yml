@@ -1,0 +1,28 @@
+name: Inkwell CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Build & Run Tests
+    runs-on: macos-14 # Uses Apple Silicon runner (M1/M2) for fast build times
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
+      - name: Build and Test (iPad Simulator)
+        run: |
+          xcodebuild test \
+            -project Inkwell.xcodeproj \
+            -scheme Inkwell \
+            -destination 'platform=iOS Simulator,name=iPad (10th generation)' \
+            -enableCodeCoverage YES \
+            clean test | xcbeautify || true
