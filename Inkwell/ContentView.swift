@@ -4,12 +4,7 @@
 //
 
 import SwiftUI
-
-enum ActiveScreen {
-    case library
-    case practice(CharacterDeck)
-    case complete(CharacterDeck, [SessionResultItem])
-}
+import SwiftData
 
 enum ActiveScreen {
     case library
