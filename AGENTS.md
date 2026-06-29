@@ -22,3 +22,5 @@ Instructions and guidelines for autonomous coding agents (Gemini, Claude Code, O
 - Ensure stroke verification algorithms perform smoothly at high frame rates on iPad hardware.
 - Keep tests updated in `InkwellTests` and `InkwellUITests`.
 - Avoid modifying Xcode project structures directly unless required; verify `project.pbxproj` changes carefully.
+- **Git Branch Naming:** Always prefix branch names with the agent's name followed by a slash (e.g., `claude/`, `gemini/` or `antigravity/`, `jules/`) so that Git clients and Xcode can group them neatly into folders under Source Control.
+
