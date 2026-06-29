@@ -144,14 +144,13 @@ struct LibraryView: View {
                                 .frame(width: 1, height: 38)
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 0) {
-                                    Text("\(avgAccuracyPct)")
-                                        .font(.inkSerif(size: 34, weight: .bold))
-                                    Text("%")
-                                        .font(.inkSerif(size: 20, weight: .bold))
-                                }
+                                (Text("\(avgAccuracyPct)")
+                                    .font(.inkSerif(size: 34, weight: .bold))
+                                + Text("%")
+                                    .font(.inkSerif(size: 20, weight: .bold)))
                                 .foregroundColor(InkTheme.ink)
-                                
+                                .lineLimit(1)
+
                                 Text("avg. accuracy")
                                     .font(.inkSans(size: 13))
                                     .foregroundColor(InkTheme.ink2)
