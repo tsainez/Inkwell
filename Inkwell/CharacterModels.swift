@@ -37,7 +37,18 @@ struct CharacterDeck: Identifiable, Codable, Hashable {
     }
 }
 
-// Structs for stroke geometry validation
+// MARK: - Stroke data source
+
+/// Indicates whether stroke data came directly from the reference database or was
+/// synthesized by IDSDecomposer from component glyphs. Synthesized data uses
+/// approximate medians, so the grader applies wider tolerances for it.
+enum StrokeDataSource: String, Codable {
+    case reference
+    case synthesized
+}
+
+// MARK: - Stroke geometry
+
 struct StrokePoint: Codable, Hashable {
     let x: Double
     let y: Double
@@ -71,8 +82,29 @@ struct StrokePoint: Codable, Hashable {
 
 struct CharacterStrokeData: Codable {
     let glyph: String
-    let strokes: [String] // SVG path strings
-    let medians: [[StrokePoint]] // Array of median points per stroke in 1024x1024 coordinate space
+    let strokes: [String]           // SVG path strings (or median-derived paths for synthesized data)
+    let medians: [[StrokePoint]]    // Centerline points per stroke, in 1024 × 900 glyph-box space
+    let source: StrokeDataSource    // .reference (DB) or .synthesized (IDS decomposition)
+
+    // Memberwise init with a default source so existing call sites stay unchanged.
+    init(glyph: String, strokes: [String], medians: [[StrokePoint]],
+         source: StrokeDataSource = .reference) {
+        self.glyph   = glyph
+        self.strokes = strokes
+        self.medians = medians
+        self.source  = source
+    }
+
+    // Custom decoder so old JSON without a "source" field decodes as .reference.
+    init(from decoder: Decoder) throws {
+        let c      = try decoder.container(keyedBy: CodingKeys.self)
+        glyph      = try c.decode(String.self, forKey: .glyph)
+        strokes    = try c.decode([String].self, forKey: .strokes)
+        medians    = try c.decode([[StrokePoint]].self, forKey: .medians)
+        source     = try c.decodeIfPresent(StrokeDataSource.self, forKey: .source) ?? .reference
+    }
+
+    private enum CodingKeys: String, CodingKey { case glyph, strokes, medians, source }
 }
 
 struct SeedData {
