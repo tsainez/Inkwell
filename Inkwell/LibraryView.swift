@@ -27,6 +27,16 @@ struct LibraryView: View {
         let total = progressList.reduce(0) { $0 + $1.accuracyPercentage }
         return total / progressList.count
     }
+
+    private var timeBasedGreeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:  return "GOOD MORNING"
+        case 12..<17: return "GOOD AFTERNOON"
+        case 17..<21: return "GOOD EVENING"
+        default:      return "GOOD NIGHT"
+        }
+    }
     
     var body: some View {
         ScrollView {
@@ -81,7 +91,7 @@ struct LibraryView: View {
                 HStack(alignment: .top, spacing: 40) {
                     // Left Hero Details
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("GOOD EVENING")
+                        Text(timeBasedGreeting)
                             .font(.inkSans(size: 13, weight: .bold))
                             .foregroundColor(InkTheme.accent)
                             .tracking(1.5)
