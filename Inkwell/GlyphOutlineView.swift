@@ -25,6 +25,11 @@ struct GlyphOutlineView: View {
 
     var body: some View {
         Canvas { context, _ in
+            let isSynthesized = strokeData.source == .synthesized
+            // Synthesized strokes are open-path centerlines; use a thick stroke
+            // so they read clearly even though they lack filled brush outlines.
+            let strokeWidth: CGFloat = isSynthesized ? metrics.scale * 38 : 0
+
             for (i, definition) in strokeData.strokes.enumerated() {
                 let path = SVGPath.path(from: definition) { x, y in
                     metrics.canvasPoint(rawX: x, rawY: y)
@@ -38,7 +43,16 @@ struct GlyphOutlineView: View {
                 } else {
                     color = ghostColor
                 }
-                context.fill(path, with: .color(color))
+
+                if isSynthesized {
+                    context.stroke(path,
+                                   with: .color(color),
+                                   style: StrokeStyle(lineWidth: strokeWidth,
+                                                      lineCap: .round,
+                                                      lineJoin: .round))
+                } else {
+                    context.fill(path, with: .color(color))
+                }
             }
         }
         .frame(width: metrics.size, height: metrics.size)

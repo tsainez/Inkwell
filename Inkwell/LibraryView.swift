@@ -12,6 +12,7 @@ struct LibraryView: View {
     let progress: [String: Int] // Deck ID to count completed
     let onSelectDeck: (CharacterDeck) -> Void
     let onOpenTable: () -> Void
+    let onOpenSettings: () -> Void
     
     @State private var customInput: String = ""
     private let suggestions = ["愛", "夢", "桜", "山川", "一期一会", "謝謝"]
@@ -74,6 +75,18 @@ struct LibraryView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .background(Capsule().stroke(InkTheme.line, lineWidth: 1.5))
+
+                        Button(action: onOpenSettings) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(InkTheme.ink)
+                                .frame(width: 38, height: 38)
+                                .background(InkTheme.card)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(InkTheme.line, lineWidth: 1.5))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Settings")
                     }
                 }
                 
