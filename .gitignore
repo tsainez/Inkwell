@@ -31,3 +31,7 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
+
+# Stroke-data build pipeline: keep build_stroke_db.py, ignore the large vendored datasets
+scripts/animCJK/
+scripts/hanzi-writer-data/

@@ -9,6 +9,7 @@ import SwiftData
 enum ActiveScreen {
     case library
     case characterTable
+    case settings
     case practice(CharacterDeck)
     case complete(CharacterDeck, [SessionResultItem])
 }
@@ -51,9 +52,12 @@ struct ContentView: View {
                     },
                     onOpenTable: {
                         activeScreen = .characterTable
+                    },
+                    onOpenSettings: {
+                        activeScreen = .settings
                     }
                 )
-                
+
             case .characterTable:
                 CharacterTableView(
                     decks: SeedData.decks,
@@ -62,6 +66,13 @@ struct ContentView: View {
                     },
                     onStartPractice: { selectedDeck in
                         activeScreen = .practice(selectedDeck)
+                    }
+                )
+
+            case .settings:
+                SettingsView(
+                    onBack: {
+                        activeScreen = .library
                     }
                 )
                 

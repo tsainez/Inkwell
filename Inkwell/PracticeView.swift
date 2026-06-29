@@ -23,7 +23,11 @@ struct PracticeView: View {
     @State private var mistakes: Int = 0
     @State private var canvasView = PKCanvasView()
     @State private var results: [SessionResultItem] = []
-    @State private var gridStyle: GuideGridStyle = .rice
+
+    // Persisted user preferences (edited in Settings).
+    @AppStorage(AppSettings.Key.strictGrading) private var strict: Bool = AppSettings.defaultStrictGrading
+    @AppStorage(AppSettings.Key.gridStyle) private var gridStyleRaw: String = AppSettings.defaultGridStyle.rawValue
+    @AppStorage(AppSettings.Key.hintThreshold) private var hintThreshold: Int = AppSettings.defaultHintThreshold
 
     // Quiz state
     @State private var expectedIndex: Int = 0          // next stroke the user must write
@@ -31,7 +35,6 @@ struct PracticeView: View {
     @State private var hintIndex: Int? = nil           // stroke highlighted as a hint
     @State private var demoIndex: Int? = nil           // stroke highlighted by "Show stroke order"
     @State private var feedback: String? = nil         // transient correction message
-    @State private var strict: Bool = false            // grading strictness toggle
     @State private var demoTask: Task<Void, Never>? = nil
 
     // Geometry of the writing pad. The outline, the reference medians, and the
@@ -43,6 +46,7 @@ struct PracticeView: View {
     private var strokeData: CharacterStrokeData? { StrokeReference.shared.data(for: currentItem.glyph) }
     private var totalStrokes: Int { strokeData?.strokes.count ?? 0 }
     private var metrics: GlyphMetrics { GlyphMetrics(size: padSide, inset: glyphInset) }
+    private var gridStyle: GuideGridStyle { GuideGridStyle(storedRawValue: gridStyleRaw) }
     private var leniency: CGFloat { strict ? 1.0 : 1.6 }
     private var strokesLeft: Int { max(0, totalStrokes - expectedIndex) }
 
@@ -264,9 +268,6 @@ struct PracticeView: View {
                         .background(InkTheme.line2.opacity(0.5))
                         .cornerRadius(16)
                 }
-
-                gradingToggle
-                    .padding(.top, 4)
             }
 
             Spacer()
@@ -276,32 +277,19 @@ struct PracticeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var gradingToggle: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("GRADING")
-                .font(.inkSans(size: 11, weight: .bold))
+    /// Shown when stroke data was assembled via IDS decomposition rather than
+    /// loaded directly from the reference database. Grading still works but uses
+    /// wider tolerances because the medians are approximate.
+    private var synthesizedNotice: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "puzzlepiece.fill")
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(InkTheme.ink3)
-                .tracking(1.0)
-
-            HStack(spacing: 0) {
-                ForEach([("Lenient", false), ("Strict", true)], id: \.0) { label, value in
-                    Button {
-                        strict = value
-                    } label: {
-                        Text(label)
-                            .font(.inkSans(size: 13, weight: .semibold))
-                            .foregroundColor(strict == value ? .white : InkTheme.ink2)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(strict == value ? InkTheme.ink : Color.clear)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .background(InkTheme.line2)
-            .cornerRadius(10)
-            .frame(maxWidth: 220)
+            Text("Approximated guide")
+                .font(.inkSans(size: 12, weight: .semibold))
+                .foregroundColor(InkTheme.ink3)
         }
+        .padding(.bottom, 4)
     }
 
     /// Shown when no reference stroke data exists for the current glyph, so the
@@ -333,6 +321,9 @@ struct PracticeView: View {
                 if strokeData == nil {
                     freePracticeNotice
                 } else {
+                    if strokeData?.source == .synthesized {
+                        synthesizedNotice
+                    }
                     HStack {
                         Text("Strokes left")
                             .font(.inkSans(size: 14))
@@ -408,6 +399,9 @@ struct PracticeView: View {
 
         var config = StrokeGrader.Config()
         config.leniency = leniency
+        // Synthesized medians are approximate (assembled from components), so
+        // give the grader more room — otherwise correct strokes get rejected.
+        if data.source == .synthesized { config.leniency *= 1.4 }
 
         switch StrokeGrader.judge(user: userBox, median: expectedMedian, config: config) {
         case .correct:
@@ -428,7 +422,7 @@ struct PracticeView: View {
             missesOnCurrentStroke += 1
             rejectLastStroke()
             feedback = "Wrong direction — start that stroke from the other end."
-            if missesOnCurrentStroke >= 3 { hintIndex = expectedIndex }
+            if missesOnCurrentStroke >= hintThreshold { hintIndex = expectedIndex }
 
         case .wrongStroke:
             mistakes += 1
@@ -439,7 +433,7 @@ struct PracticeView: View {
             } else {
                 feedback = "Not quite — try stroke \(expectedIndex + 1) again."
             }
-            if missesOnCurrentStroke >= 3 { hintIndex = expectedIndex }
+            if missesOnCurrentStroke >= hintThreshold { hintIndex = expectedIndex }
         }
     }
 

@@ -41,9 +41,20 @@ final class StrokeReference {
         if let cached = cache[glyph] {
             return cached
         }
+        // 1. Try the reference database first.
         if let loaded = fetchFromDatabase(glyph: glyph) {
             cache[glyph] = loaded
             return loaded
+        }
+        // 2. Fall back to IDS decomposition synthesis.
+        //    The lookup closure passes only reference data to avoid recursion:
+        //    components must already be in the DB, not themselves synthesized.
+        if let synthesized = IDSDecomposer.synthesize(
+            glyph: glyph,
+            lookup: { [weak self] g in self?.fetchFromDatabase(glyph: g) }
+        ) {
+            cache[glyph] = synthesized
+            return synthesized
         }
         return nil
     }
