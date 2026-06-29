@@ -191,14 +191,14 @@ enum StrokeGrader {
         guard total > 0 else { return Array(repeating: cleaned[0], count: count) }
 
         let interval = total / CGFloat(count - 1)
-        var points = cleaned
-        var result: [CGPoint] = [points[0]]
+        var result: [CGPoint] = [cleaned[0]]
         var accumulated: CGFloat = 0
         var i = 1
 
-        while i < points.count {
-            let prev = points[i - 1]
-            let curr = points[i]
+        var prev = cleaned[0]
+
+        while i < cleaned.count {
+            let curr = cleaned[i]
             let segment = distance(prev, curr)
 
             if accumulated + segment >= interval {
@@ -206,12 +206,15 @@ enum StrokeGrader {
                 let q = CGPoint(x: prev.x + t * (curr.x - prev.x),
                                 y: prev.y + t * (curr.y - prev.y))
                 result.append(q)
-                points.insert(q, at: i) // reconsider the remainder of this segment
+                // We don't advance `i` yet, but update `prev` to our new inserted point `q`
+                // ⚡ Bolt: Removed O(N^2) array insertion here, keeping iteration purely O(N)
+                prev = q
                 accumulated = 0
             } else {
                 accumulated += segment
+                prev = curr
+                i += 1
             }
-            i += 1
         }
 
         // Guarantee exactly `count` points, with the true endpoint preserved.
