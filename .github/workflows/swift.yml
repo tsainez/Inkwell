@@ -27,9 +27,15 @@ jobs:
       - name: Build and Test (iPad Simulator)
         run: |
           set -o pipefail
+          # Run serially on a single simulator. Parallel testing fans tests out
+          # across cloned simulators, and on the hosted runner some clones fail
+          # to launch — marking every test assigned to them as failed in 0.000s
+          # even though they pass on a healthy clone. Serial execution is a touch
+          # slower but deterministic.
           xcodebuild test \
             -project Inkwell.xcodeproj \
             -scheme Inkwell \
             -destination 'platform=iOS Simulator,name=iPad (10th generation)' \
+            -parallel-testing-enabled NO \
             -enableCodeCoverage YES \
             clean test | xcbeautify
