@@ -9,14 +9,17 @@ on:
 jobs:
   test:
     name: Build & Run Tests
-    runs-on: macos-14 # Uses Apple Silicon runner (M1/M2) for fast build times
+    runs-on: macos-15 # Apple Silicon runner; ships Xcode 16+ to open the project (objectVersion 77)
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+      # The project is saved in Xcode 16's format (objectVersion 77, synchronized
+      # folders), so it needs Xcode 16+. The macos-15 image's default Xcode meets
+      # this; print the version so the log records exactly what built.
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Install xcbeautify
         run: brew list xcbeautify || brew install xcbeautify
