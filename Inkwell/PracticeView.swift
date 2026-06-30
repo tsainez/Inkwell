@@ -123,7 +123,7 @@ struct PracticeView: View {
                 RoundedRectangle(cornerRadius: 24)
                     .fill(InkTheme.card)
                     .overlay(RoundedRectangle(cornerRadius: 24).stroke(InkTheme.line, lineWidth: 1))
-                    .shadow(color: Color.black.opacity(0.04), radius: 20, x: 0, y: 8)
+                    .shadow(color: InkTheme.shadow, radius: 20, x: 0, y: 8)
 
                 // Grid + reference outline + drawing surface, all sharing one square.
                 ZStack {
@@ -140,7 +140,7 @@ struct PracticeView: View {
                         // Fallback ghost if reference data is unavailable.
                         Text(currentItem.glyph)
                             .font(.system(size: 320, weight: .regular, design: .serif))
-                            .foregroundColor(InkTheme.ink3.opacity(0.12))
+                            .foregroundColor(InkTheme.glyphGhost)
                     }
 
                     PencilCanvasView(canvasView: $canvasView, onStrokeFinished: handleStroke)

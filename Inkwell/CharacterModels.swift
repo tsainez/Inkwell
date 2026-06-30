@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 struct CharacterItem: Identifiable, Codable, Hashable {
     var id: String { glyph }
@@ -28,11 +29,23 @@ struct CharacterDeck: Identifiable, Codable, Hashable {
     let accentName: String
     let chars: [CharacterItem]
     
+    /// Fixed light-mode hex for the deck accent. Kept for any callers that need
+    /// a raw value; prefer `accent` for UI so the color adapts to appearance.
     var accentColor: String {
         switch accentName {
         case "sun": return "#9a6a2f"
         case "jade": return "#1f6f6b"
         default: return "#c8492f" // vermilion / ink
+        }
+    }
+
+    /// Appearance-adaptive accent, mapped through `InkTheme` so deck colors
+    /// brighten appropriately in Dark Mode instead of going muddy.
+    var accent: Color {
+        switch accentName {
+        case "sun":  return InkTheme.sun
+        case "jade": return InkTheme.jade
+        default:     return InkTheme.accent
         }
     }
 }

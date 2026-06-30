@@ -667,4 +667,18 @@ struct DesignTokenTests {
         #expect(AppAppearance(storedRawValue: "dark") == .dark)
         #expect(AppAppearance(storedRawValue: "light") == .light)
     }
+
+    /// The adaptive deck accent maps each `accentName` to the matching
+    /// appearance-aware `InkTheme` token (so deck colors brighten in Dark Mode),
+    /// while the legacy `accentColor` hex string stays fixed for compatibility.
+    @Test func deckAccentMapsToAdaptiveToken() {
+        func deck(_ name: String) -> CharacterDeck {
+            CharacterDeck(id: "t", lang: .both, script: "", level: "",
+                          title: "", blurb: "", accentName: name, chars: [])
+        }
+        #expect(deck("sun").accent == InkTheme.sun)
+        #expect(deck("jade").accent == InkTheme.jade)
+        #expect(deck("ink").accent == InkTheme.accent)
+        #expect(deck("anything-else").accent == InkTheme.accent)
+    }
 }

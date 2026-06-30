@@ -229,7 +229,7 @@ struct LibraryView: View {
                     .frame(width: 380)
                     .background(InkTheme.card)
                     .cornerRadius(18)
-                    .shadow(color: Color.black.opacity(0.04), radius: 12, x: 0, y: 4)
+                    .shadow(color: InkTheme.shadow, radius: 12, x: 0, y: 4)
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(InkTheme.line, lineWidth: 1))
                 }
                 .padding(.bottom, 16)
@@ -388,7 +388,7 @@ struct CharacterOfTheDayWidget: View {
             .background(InkTheme.card)
             .cornerRadius(24)
             .overlay(RoundedRectangle(cornerRadius: 24).stroke(InkTheme.line, lineWidth: 1))
-            .shadow(color: Color.black.opacity(0.03), radius: 12, x: 0, y: 4)
+            .shadow(color: InkTheme.shadow, radius: 12, x: 0, y: 4)
             .clipped()
         )
     }
@@ -441,7 +441,7 @@ struct DeckCardView: View {
                                 RoundedRectangle(cornerRadius: 3)
                                     .fill(InkTheme.line2)
                                 RoundedRectangle(cornerRadius: 3)
-                                    .fill(Color(hex: deck.accentColor))
+                                    .fill(deck.accent)
                                     .frame(width: geo.size.width * CGFloat(completedCount) / CGFloat(max(deck.chars.count, 1)))
                             }
                         }
@@ -458,7 +458,7 @@ struct DeckCardView: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 36, height: 36)
-                        .background(Color(hex: deck.accentColor))
+                        .background(deck.accent)
                         .clipShape(Circle())
                 }
             }
@@ -469,14 +469,14 @@ struct DeckCardView: View {
             .overlay(
                 HStack {
                     Rectangle()
-                        .fill(Color(hex: deck.accentColor))
+                        .fill(deck.accent)
                         .frame(width: 5)
                     Spacer()
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 20))
             )
             .overlay(RoundedRectangle(cornerRadius: 20).stroke(InkTheme.line, lineWidth: 1))
-            .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 4)
+            .shadow(color: InkTheme.shadow, radius: 10, x: 0, y: 4)
         }
         .buttonStyle(PlainButtonStyle())
     }

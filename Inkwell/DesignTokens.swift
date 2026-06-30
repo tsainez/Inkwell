@@ -72,6 +72,13 @@ struct InkTheme {
     static let card   = Color(uiColor: .inkAdaptive("#fffdf9", "#211d17"))   // card surfaces
     static let jade   = Color(uiColor: .inkAdaptive("#1f6f6b", "#3fa39d"))   // secondary deck accent
     static let sun    = Color(uiColor: .inkAdaptive("#9a6a2f", "#c89a5a"))   // alternate deck accent
+
+    // Effect tokens — alpha is baked into the hex (ARGB). These need per-mode
+    // *opacity*, not just hue: shadows must be near-invisible in light but read
+    // as a soft grounding in dark, and the reference glyph needs a touch more
+    // presence against the dark pad.
+    static let shadow     = Color(uiColor: .inkAdaptive("#0a000000", "#33000000")) // card elevation
+    static let glyphGhost = Color(uiColor: .inkAdaptive("#249a948a", "#40b8b1a3")) // faint reference glyph
 }
 
 extension Font {

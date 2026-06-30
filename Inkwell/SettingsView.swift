@@ -294,7 +294,7 @@ private struct SettingsCard<Content: View>: View {
         .background(InkTheme.card)
         .cornerRadius(18)
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(InkTheme.line, lineWidth: 1))
-        .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 4)
+        .shadow(color: InkTheme.shadow, radius: 10, x: 0, y: 4)
     }
 }
 

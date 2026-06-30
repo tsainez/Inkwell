@@ -46,25 +46,30 @@ pass in CI.
 
 ---
 
-## Phase 2 — Dark Mode polish
+## Phase 2 — Dark Mode polish 🔧 (in progress)
 
 Make Dark Mode look *designed*, not merely inverted.
 
-- **Deck accent adaptation.** `CharacterDeck.accentColor` returns fixed hex
-  (vermilion/jade/sun). Route these through adaptive tokens so deck bars/arrows
-  use the brightened dark variants.
-- **Elevation & depth.** Shadows mostly vanish on dark backgrounds; replace
-  shadow-based elevation with subtle border/surface-tint elevation in dark
-  (`card` over `paper` over a deeper base).
-- **Writing-pad contrast pass.** Tune `GlyphOutlineView` ghost/completed/hint
-  opacities and `GuideGridView` line/diagonal alpha for the dark canvas so the
-  reference glyph and grid read well without glare.
-- **Ambient background wash.** Optional subtle gradient/paper-texture behind
+- ✅ **Deck accent adaptation.** Added an adaptive `CharacterDeck.accent` (mapped
+  through `InkTheme`) so deck bars/progress/arrows use the brightened dark
+  variants. The legacy `accentColor` hex string is kept for compatibility.
+- ✅ **Adaptive elevation.** New `InkTheme.shadow` token (alpha baked per mode):
+  near-invisible in light, a soft grounding in dark. Replaces the hardcoded
+  `Color.black.opacity(...)` shadows on every card/pad. Depth in dark is carried
+  mainly by the `card`-over-`paper` surface tint.
+- ✅ **Reference-glyph contrast.** New `InkTheme.glyphGhost` token gives the faint
+  traced glyph a touch more presence on the dark pad (used by `GlyphOutlineView`
+  and the no-data fallback).
+- ⏳ **Guide-grid tuning.** Audit `GuideGridView` border/diagonal alpha on the
+  dark canvas (the dashed cross + rice diagonals) for glare-free legibility.
+- ⏳ **Ambient background wash.** Optional subtle gradient/paper-texture behind
   `paper` for warmth in both modes.
-- **System chrome.** Status bar style, a Dark-aware launch screen, and a
-  Dark-variant app icon (Xcode 14+ supports tinted/dark icon variants).
-- **Asset-catalog option.** Evaluate migrating tokens to a `.xcassets` Color Set
-  set for designer-friendly editing + native Previews. (Trade-off: touches
+- ⏳ **System chrome.** Status bar adapts automatically via `preferredColorScheme`;
+  still need a Dark-aware launch screen and a Dark-variant app icon (Xcode 14+
+  tinted/dark icon variants). *Touches asset catalog / project config — best done
+  where a build can verify it.*
+- ⏳ **Asset-catalog option.** Evaluate migrating tokens to `.xcassets` Color Sets
+  for designer-friendly editing + native Previews. (Trade-off: touches
   `project.pbxproj`; the code-token approach is currently preferred per
   `CLAUDE.md`.)
 
@@ -148,7 +153,7 @@ Tracked across all phases, blocking for release.
 | Phase | Scope | Status |
 |------:|-------|--------|
 | 1 | Dark Mode foundation (tokens, `onInk`, appearance setting, PencilKit ink, tests) | ✅ Implemented |
-| 2 | Dark Mode polish (deck accents, elevation, canvas contrast, icon/launch) | ⏳ Planned |
+| 2 | Dark Mode polish (deck accents, elevation, glyph contrast done; grid/icon/launch remain) | 🔧 In progress |
 | 3 | Liquid Glass adoption (Xcode 26 SDK, glass surfaces/buttons, edge effects) | ⏳ Planned |
 | 4 | Promotional material pipeline (demo state, screenshot harness, copy) | ⏳ Planned |
 | — | Accessibility & QA | 🔁 Ongoing |
