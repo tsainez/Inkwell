@@ -371,7 +371,7 @@ struct PracticeView: View {
                                 .font(.inkSans(size: 16, weight: .bold))
                             Image(systemName: "arrow.right").font(.system(size: 16, weight: .bold))
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(InkTheme.onInk)
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
                         .background(InkTheme.ink)

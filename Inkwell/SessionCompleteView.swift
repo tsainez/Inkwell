@@ -131,7 +131,7 @@ struct SessionCompleteView: View {
                     Button(action: onAgain) {
                         Text("Practice again")
                             .font(.inkSans(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(InkTheme.onInk)
                             .frame(width: 200, height: 50)
                             .background(InkTheme.ink)
                             .cornerRadius(12)

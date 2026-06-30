@@ -2,8 +2,19 @@
 //  DesignTokens.swift
 //  Inkwell
 //
+//  Single source of truth for color and typography. Every color is defined as
+//  an *adaptive* token that resolves to a light value in Light Mode and a dark
+//  value in Dark Mode, so views never have to branch on `colorScheme` — they
+//  just use `InkTheme.x` and the system picks the right shade per trait.
+//
+//  The palette keeps Inkwell's "sumi ink on washi paper" identity in both
+//  appearances: warm off-white paper in light, warm near-black in dark, with
+//  the vermilion seal accent carried across (slightly brightened for dark so it
+//  stays legible against the deep background).
+//
 
 import SwiftUI
+import UIKit
 
 extension Color {
     init(hex: String) {
@@ -31,17 +42,36 @@ extension Color {
     }
 }
 
+extension UIColor {
+    /// A color that resolves to `light` in Light Mode and `dark` in Dark Mode.
+    /// Both arguments are hex strings parsed via `Color(hex:)`. The returned
+    /// `UIColor` is dynamic, so it re-resolves automatically whenever the
+    /// surrounding trait collection's `userInterfaceStyle` changes.
+    static func inkAdaptive(_ light: String, _ dark: String) -> UIColor {
+        UIColor { traits in
+            UIColor(Color(hex: traits.userInterfaceStyle == .dark ? dark : light))
+        }
+    }
+}
+
 struct InkTheme {
-    static let accent = Color(hex: "#c8492f")      // vermilion
-    static let paper = Color(hex: "#f7f4ee")       // app background
-    static let ink = Color(hex: "#2b2925")         // primary text / dark elements
-    static let ink2 = Color(hex: "#6b665d")        // secondary text
-    static let ink3 = Color(hex: "#9a948a")        // tertiary / muted text
-    static let line = Color(hex: "#e7e2d8")        // borders
-    static let line2 = Color(hex: "#efebe2")       // dividers / track bg
-    static let card = Color(hex: "#fffdf9")        // card surfaces
-    static let jade = Color(hex: "#1f6f6b")        // secondary deck accent
-    static let sun = Color(hex: "#9a6a2f")         // alternate deck accent
+    // UIKit-resolvable source of truth for the primary ink. PencilKit needs a
+    // `UIColor` (not a SwiftUI `Color`) for the pen tool, and keeping it dynamic
+    // means the wet ink tracks the active appearance.
+    static let inkUI = UIColor.inkAdaptive("#2b2925", "#f4efe6")
+
+    // Token                                  light        dark
+    static let accent = Color(uiColor: .inkAdaptive("#c8492f", "#e15d42"))   // vermilion — primary accent
+    static let paper  = Color(uiColor: .inkAdaptive("#f7f4ee", "#17150f"))   // app background
+    static let ink    = Color(uiColor: inkUI)                                // primary text & strong fills
+    static let onInk  = Color(uiColor: .inkAdaptive("#ffffff", "#17150f"))   // content sitting on an `ink` fill
+    static let ink2   = Color(uiColor: .inkAdaptive("#6b665d", "#b8b1a3"))   // secondary text
+    static let ink3   = Color(uiColor: .inkAdaptive("#9a948a", "#8a8376"))   // tertiary / muted text
+    static let line   = Color(uiColor: .inkAdaptive("#e7e2d8", "#39342b"))   // borders
+    static let line2  = Color(uiColor: .inkAdaptive("#efebe2", "#2a261f"))   // dividers / track / chip bg
+    static let card   = Color(uiColor: .inkAdaptive("#fffdf9", "#211d17"))   // card surfaces
+    static let jade   = Color(uiColor: .inkAdaptive("#1f6f6b", "#3fa39d"))   // secondary deck accent
+    static let sun    = Color(uiColor: .inkAdaptive("#9a6a2f", "#c89a5a"))   // alternate deck accent
 }
 
 extension Font {
@@ -49,7 +79,7 @@ extension Font {
     static func inkSerif(size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .system(size: size, weight: weight, design: .serif)
     }
-    
+
     static func inkSans(size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .system(size: size, weight: weight, design: .default)
     }

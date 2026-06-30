@@ -181,14 +181,14 @@ struct LibraryView: View {
                                 .font(.inkSerif(size: 18))
                                 .padding(.horizontal, 14)
                                 .frame(height: 46)
-                                .background(Color.white)
+                                .background(InkTheme.paper)
                                 .cornerRadius(10)
                                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
-                            
+
                             Button(action: startCustomPractice) {
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 18, weight: .bold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(InkTheme.onInk)
                                     .frame(width: 46, height: 46)
                                     .background(InkTheme.ink)
                                     .cornerRadius(10)
@@ -365,7 +365,7 @@ struct CharacterOfTheDayWidget: View {
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 13, weight: .bold))
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(InkTheme.onInk)
                             .padding(.horizontal, 20)
                             .padding(.vertical, 12)
                             .background(InkTheme.ink)

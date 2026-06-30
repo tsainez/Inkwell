@@ -90,17 +90,36 @@ Stroke geometry (SVG paths + medians) is bundled locally — no network dependen
 
 ### Design Tokens (`DesignTokens.swift`)
 
-Always use `InkTheme` constants — never use raw color values or system colors:
+Always use `InkTheme` constants — never use raw color values or system colors.
+Every token is **appearance-adaptive**: it carries both a light and a dark value
+and resolves automatically per trait collection, so views never branch on
+`colorScheme`. Tokens are built from `UIColor.inkAdaptive(light:dark:)` (a
+dynamic `UIColor`) and exposed as SwiftUI `Color`s.
 
 ```swift
-InkTheme.accent   // #c8492f  vermilion — primary actions
-InkTheme.paper    // #f7f4ee  background
-InkTheme.ink      // #2b2925  primary text
-InkTheme.ink2     // #6b665d  secondary text
-InkTheme.jade     // #1f6f6b  secondary accent
-InkTheme.card     // #fffdf9  card surfaces
-InkTheme.line     // #e7e2d8  borders
+//                    light      dark      role
+InkTheme.accent   //  #c8492f   #e15d42   vermilion — primary accent
+InkTheme.paper    //  #f7f4ee   #17150f   app background
+InkTheme.ink      //  #2b2925   #f4efe6   primary text & strong fills
+InkTheme.onInk    //  #ffffff   #17150f   content sitting on an `ink` fill
+InkTheme.ink2     //  #6b665d   #b8b1a3   secondary text
+InkTheme.ink3     //  #9a948a   #8a8376   tertiary / muted text
+InkTheme.line     //  #e7e2d8   #39342b   borders
+InkTheme.line2    //  #efebe2   #2a261f   dividers / track / chip bg
+InkTheme.card     //  #fffdf9   #211d17   card surfaces
+InkTheme.jade     //  #1f6f6b   #3fa39d   secondary deck accent
+InkTheme.sun      //  #9a6a2f   #c89a5a   alternate deck accent
 ```
+
+Key rule: a filled button uses `.background(InkTheme.ink)` paired with
+`.foregroundColor(InkTheme.onInk)` — **never** a hardcoded `.white`, which
+disappears against the light `ink` fill in Dark Mode. `.white` is only correct
+on saturated accent/deck-color fills. For PencilKit (which needs a `UIColor`,
+not a `Color`), use `InkTheme.inkUI`.
+
+**Appearance preference:** `AppAppearance` (System / Light / Dark) is persisted
+via `AppSettings.Key.appearance`, edited in `SettingsView`, and applied app-wide
+through `.preferredColorScheme(_:)` on `ContentView`'s root.
 
 Typography: `.inkSerif()` for display/headings, `.inkSans()` for UI/body.
 

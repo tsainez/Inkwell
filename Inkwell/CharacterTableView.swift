@@ -321,7 +321,7 @@ struct CharacterTableView: View {
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
                                 .background(selectedFilter == option ? InkTheme.ink : InkTheme.card)
-                                .foregroundColor(selectedFilter == option ? .white : InkTheme.ink)
+                                .foregroundColor(selectedFilter == option ? InkTheme.onInk : InkTheme.ink)
                                 .cornerRadius(20)
                                 .overlay(RoundedRectangle(cornerRadius: 20).stroke(selectedFilter == option ? Color.clear : InkTheme.line, lineWidth: 1))
                         }
@@ -511,7 +511,7 @@ struct CharacterTableRowView: View {
                 Button(action: onPractice) {
                     Text("Practice")
                         .font(.inkSans(size: 13, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(InkTheme.onInk)
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
                         .background(InkTheme.ink)
