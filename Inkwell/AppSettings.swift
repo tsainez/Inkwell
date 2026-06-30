@@ -16,6 +16,7 @@ enum AppSettings {
         static let strictGrading = "settings.strictGrading"
         static let gridStyle = "settings.gridStyle"
         static let hintThreshold = "settings.hintThreshold"
+        static let appearance = "settings.appearance"
     }
 
     // MARK: - Defaults
@@ -23,9 +24,43 @@ enum AppSettings {
     static let defaultStrictGrading = false
     static let defaultGridStyle = GuideGridStyle.rice
     static let defaultHintThreshold = 3
+    static let defaultAppearance = AppAppearance.system
 
     /// Allowed range for "wrong strokes before the next stroke is highlighted".
     static let hintThresholdRange = 1...6
+}
+
+/// User-selectable app appearance. `system` defers to the device setting; the
+/// other two pin the app to a single scheme regardless of the device.
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: return "System"
+        case .light:  return "Light"
+        case .dark:   return "Dark"
+        }
+    }
+
+    /// The value to feed `.preferredColorScheme(_:)`. `nil` means "follow the
+    /// system", which is exactly what SwiftUI expects for the system option.
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light:  return .light
+        case .dark:   return .dark
+        }
+    }
+
+    /// Resolve a stored raw value back to an appearance, falling back to default.
+    init(storedRawValue: String) {
+        self = AppAppearance(rawValue: storedRawValue) ?? AppSettings.defaultAppearance
+    }
 }
 
 extension GuideGridStyle {

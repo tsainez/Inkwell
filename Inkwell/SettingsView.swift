@@ -18,6 +18,7 @@ struct SettingsView: View {
     @AppStorage(AppSettings.Key.strictGrading) private var strictGrading: Bool = AppSettings.defaultStrictGrading
     @AppStorage(AppSettings.Key.gridStyle) private var gridStyleRaw: String = AppSettings.defaultGridStyle.rawValue
     @AppStorage(AppSettings.Key.hintThreshold) private var hintThreshold: Int = AppSettings.defaultHintThreshold
+    @AppStorage(AppSettings.Key.appearance) private var appearanceRaw: String = AppSettings.defaultAppearance.rawValue
 
     @State private var showResetConfirm = false
 
@@ -35,6 +36,7 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
+                    appearanceSection
                     gradingSection
                     writingPadSection
                     hintsSection
@@ -95,6 +97,22 @@ struct SettingsView: View {
         .padding(.vertical, 18)
         .background(InkTheme.card)
         .overlay(Rectangle().frame(height: 1).foregroundColor(InkTheme.line), alignment: .bottom)
+    }
+
+    // MARK: - Appearance
+
+    private var appearanceSection: some View {
+        SettingsCard(
+            icon: "circle.lefthalf.filled",
+            label: "APPEARANCE",
+            title: "Theme",
+            description: "Match the device, or pin Inkwell to Light or Dark. The writing pad, decks, and ink all follow your choice."
+        ) {
+            SegmentedPicker(
+                options: AppAppearance.allCases.map { ($0.title, $0.rawValue) },
+                selection: $appearanceRaw
+            )
+        }
     }
 
     // MARK: - Grading
@@ -276,7 +294,7 @@ private struct SettingsCard<Content: View>: View {
         .background(InkTheme.card)
         .cornerRadius(18)
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(InkTheme.line, lineWidth: 1))
-        .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 4)
+        .shadow(color: InkTheme.shadow, radius: 10, x: 0, y: 4)
     }
 }
 
@@ -296,7 +314,7 @@ private struct SegmentedPicker<Value: Equatable>: View {
                 } label: {
                     Text(label)
                         .font(.inkSans(size: 14, weight: .semibold))
-                        .foregroundColor(selection == value ? .white : InkTheme.ink2)
+                        .foregroundColor(selection == value ? InkTheme.onInk : InkTheme.ink2)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
                         .background(selection == value ? InkTheme.ink : Color.clear)

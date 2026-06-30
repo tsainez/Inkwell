@@ -9,6 +9,7 @@ import Testing
 import CoreGraphics
 import Foundation
 import SwiftUI
+import UIKit
 @testable import Inkwell
 
 // MARK: - StrokeGrader
@@ -630,5 +631,54 @@ struct CharacterProgressTests {
         let progress = CharacterProgress(glyph: "我", timesPracticed: 5)
         #expect(progress.isMastered(threshold: 5) == true)
         #expect(progress.isMastered(threshold: 6) == false)
+    }
+}
+
+// MARK: - Design tokens (adaptive color)
+
+struct DesignTokenTests {
+
+    /// The primary ink must resolve to genuinely different colors in light vs
+    /// dark — this is the load-bearing guarantee of the whole dark-mode system.
+    @Test func inkResolvesDifferentlyPerAppearance() {
+        let light = InkTheme.inkUI.resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
+        let dark  = InkTheme.inkUI.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))
+        #expect(light != dark)
+    }
+
+    /// A flat (non-dynamic) color built from a hex string resolves to the same
+    /// value regardless of appearance, proving `inkAdaptive` is what supplies
+    /// the per-trait behavior — not some accident of the bridging.
+    @Test func staticHexColorIsAppearanceIndependent() {
+        let flat = UIColor(Color(hex: "#c8492f"))
+        let light = flat.resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
+        let dark  = flat.resolvedColor(with: UITraitCollection(userInterfaceStyle: .dark))
+        #expect(light == dark)
+    }
+
+    @Test func appearanceColorSchemeMapping() {
+        #expect(AppAppearance.system.colorScheme == nil)
+        #expect(AppAppearance.light.colorScheme == .light)
+        #expect(AppAppearance.dark.colorScheme == .dark)
+    }
+
+    @Test func appearanceStoredRawValueFallsBackToDefault() {
+        #expect(AppAppearance(storedRawValue: "not-a-real-value") == AppSettings.defaultAppearance)
+        #expect(AppAppearance(storedRawValue: "dark") == .dark)
+        #expect(AppAppearance(storedRawValue: "light") == .light)
+    }
+
+    /// The adaptive deck accent maps each `accentName` to the matching
+    /// appearance-aware `InkTheme` token (so deck colors brighten in Dark Mode),
+    /// while the legacy `accentColor` hex string stays fixed for compatibility.
+    @Test func deckAccentMapsToAdaptiveToken() {
+        func deck(_ name: String) -> CharacterDeck {
+            CharacterDeck(id: "t", lang: .both, script: "", level: "",
+                          title: "", blurb: "", accentName: name, chars: [])
+        }
+        #expect(deck("sun").accent == InkTheme.sun)
+        #expect(deck("jade").accent == InkTheme.jade)
+        #expect(deck("ink").accent == InkTheme.accent)
+        #expect(deck("anything-else").accent == InkTheme.accent)
     }
 }

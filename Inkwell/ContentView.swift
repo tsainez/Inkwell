@@ -24,6 +24,10 @@ struct ContentView: View {
         "zh-hsk1": 5,
         "numbers": 10
     ]
+
+    // Drives the app-wide light/dark preference. Edited in Settings; `nil`
+    // (the "System" option) lets the device setting win.
+    @AppStorage(AppSettings.Key.appearance) private var appearanceRaw: String = AppSettings.defaultAppearance.rawValue
     
     private func saveResults(_ results: [SessionResultItem], for deck: CharacterDeck) {
         let flawless = results.filter { !$0.skipped && $0.mistakes == 0 }.count
@@ -98,6 +102,9 @@ struct ContentView: View {
                 )
             }
         }
+        .background(InkTheme.paper.ignoresSafeArea())
+        .tint(InkTheme.accent)
+        .preferredColorScheme(AppAppearance(storedRawValue: appearanceRaw).colorScheme)
     }
 }
 

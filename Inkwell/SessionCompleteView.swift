@@ -131,7 +131,7 @@ struct SessionCompleteView: View {
                     Button(action: onAgain) {
                         Text("Practice again")
                             .font(.inkSans(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(InkTheme.onInk)
                             .frame(width: 200, height: 50)
                             .background(InkTheme.ink)
                             .cornerRadius(12)
@@ -155,7 +155,7 @@ struct SessionCompleteView: View {
             .frame(width: 560)
             .background(InkTheme.card)
             .cornerRadius(24)
-            .shadow(color: Color.black.opacity(0.06), radius: 30, x: 0, y: 12)
+            .shadow(color: InkTheme.shadow, radius: 30, x: 0, y: 12)
             .overlay(RoundedRectangle(cornerRadius: 24).stroke(InkTheme.line, lineWidth: 1))
         }
     }

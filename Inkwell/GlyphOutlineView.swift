@@ -19,7 +19,7 @@ struct GlyphOutlineView: View {
     /// A stroke to emphasize as a hint, if any.
     var highlightIndex: Int? = nil
 
-    var ghostColor: Color = InkTheme.ink3.opacity(0.14)
+    var ghostColor: Color = InkTheme.glyphGhost
     var completedColor: Color = InkTheme.ink.opacity(0.85)
     var highlightColor: Color = InkTheme.accent
 

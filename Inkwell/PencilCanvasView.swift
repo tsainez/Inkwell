@@ -8,7 +8,7 @@ import PencilKit
 
 struct PencilCanvasView: UIViewRepresentable {
     @Binding var canvasView: PKCanvasView
-    var inkColor: UIColor = UIColor(InkTheme.ink)
+    var inkColor: UIColor = InkTheme.inkUI
     var strokeWidth: CGFloat = 16.0
 
     /// Called once each time the user finishes a stroke (lifts the pen), with
