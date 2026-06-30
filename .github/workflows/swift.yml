@@ -18,11 +18,15 @@ jobs:
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
 
+      - name: Install xcbeautify
+        run: brew list xcbeautify || brew install xcbeautify
+
       - name: Build and Test (iPad Simulator)
         run: |
+          set -o pipefail
           xcodebuild test \
             -project Inkwell.xcodeproj \
             -scheme Inkwell \
             -destination 'platform=iOS Simulator,name=iPad (10th generation)' \
             -enableCodeCoverage YES \
-            clean test | xcbeautify || true
+            clean test | xcbeautify
