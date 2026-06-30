@@ -61,7 +61,7 @@ struct GuideGridView: View {
             
             GuideGridShape(style: style)
                 .stroke(
-                    InkTheme.accent.opacity(0.22),
+                    InkTheme.guide,
                     style: StrokeStyle(lineWidth: 1.5, dash: [6, 6])
                 )
         }

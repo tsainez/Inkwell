@@ -60,14 +60,21 @@ Make Dark Mode look *designed*, not merely inverted.
 - ✅ **Reference-glyph contrast.** New `InkTheme.glyphGhost` token gives the faint
   traced glyph a touch more presence on the dark pad (used by `GlyphOutlineView`
   and the no-data fallback).
-- ⏳ **Guide-grid tuning.** Audit `GuideGridView` border/diagonal alpha on the
-  dark canvas (the dashed cross + rice diagonals) for glare-free legibility.
+- ✅ **Guide-grid tuning.** New `InkTheme.guide` token: the dashed cross + rice
+  diagonals keep presence on the dark pad (brighter alpha in dark) without glare
+  in light.
+- ✅ **Branded system controls.** Populated the (previously empty) `AccentColor`
+  asset with adaptive vermilion and set `.tint(InkTheme.accent)` at the root, so
+  text cursors, selection, the hint `Stepper`, the Sort menu, and the reset
+  `Alert` use the brand color instead of falling back to iOS blue.
+- ✅ **Root paper backdrop.** `.background(InkTheme.paper)` on the root prevents a
+  system-black flash behind screen transitions.
+- ✅ **Launch screen.** Auto-generated launch screen uses the adaptive system
+  background — a Dark-mode device gets a dark launch, no white flash.
+- ⏳ **App icon.** `AppIcon` declares light/dark/tinted slots but has no image
+  files yet — needs artwork before submission (an asset task, not a runtime bug).
 - ⏳ **Ambient background wash.** Optional subtle gradient/paper-texture behind
   `paper` for warmth in both modes.
-- ⏳ **System chrome.** Status bar adapts automatically via `preferredColorScheme`;
-  still need a Dark-aware launch screen and a Dark-variant app icon (Xcode 14+
-  tinted/dark icon variants). *Touches asset catalog / project config — best done
-  where a build can verify it.*
 - ⏳ **Asset-catalog option.** Evaluate migrating tokens to `.xcassets` Color Sets
   for designer-friendly editing + native Previews. (Trade-off: touches
   `project.pbxproj`; the code-token approach is currently preferred per

@@ -102,6 +102,8 @@ struct ContentView: View {
                 )
             }
         }
+        .background(InkTheme.paper.ignoresSafeArea())
+        .tint(InkTheme.accent)
         .preferredColorScheme(AppAppearance(storedRawValue: appearanceRaw).colorScheme)
     }
 }

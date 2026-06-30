@@ -79,6 +79,7 @@ struct InkTheme {
     // presence against the dark pad.
     static let shadow     = Color(uiColor: .inkAdaptive("#0a000000", "#33000000")) // card elevation
     static let glyphGhost = Color(uiColor: .inkAdaptive("#249a948a", "#40b8b1a3")) // faint reference glyph
+    static let guide      = Color(uiColor: .inkAdaptive("#38c8492f", "#66e15d42")) // writing-pad guide lines
 }
 
 extension Font {
