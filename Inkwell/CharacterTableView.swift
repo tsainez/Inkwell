@@ -170,6 +170,7 @@ struct CharacterTableView: View {
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
             }
+            .accessibilityLabel("Back to Decks")
             
             Spacer()
             
@@ -281,6 +282,7 @@ struct CharacterTableView: View {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(InkTheme.ink3)
                         }
+                        .accessibilityLabel("Clear search")
                     }
                 }
                 .padding(.horizontal, 14)
@@ -517,6 +519,7 @@ struct CharacterTableRowView: View {
                         .background(InkTheme.ink)
                         .cornerRadius(8)
                 }
+                .accessibilityLabel("Practice \(item.glyph)")
             }
         }
         .padding(18)

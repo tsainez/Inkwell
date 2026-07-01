@@ -75,6 +75,7 @@ struct SettingsView: View {
                 .cornerRadius(10)
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
             }
+            .accessibilityLabel("Back to Decks")
 
             Spacer()
 
@@ -209,6 +210,7 @@ struct SettingsView: View {
                         .stroke(practicedCount == 0 ? InkTheme.line : InkTheme.accent.opacity(0.5), lineWidth: 1)
                 )
             }
+            .accessibilityLabel("Reset all progress")
             .buttonStyle(.plain)
             .disabled(practicedCount == 0)
         }
