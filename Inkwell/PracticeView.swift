@@ -54,16 +54,34 @@ struct PracticeView: View {
     private var leniency: CGFloat { strict ? 1.0 : 1.6 }
     private var strokesLeft: Int { max(0, totalStrokes - expectedIndex) }
 
+    /// A single-character session loops forever: the done state offers replay
+    /// instead of advancing, and the user leaves via "Finish session".
+    private var isEndless: Bool { deck.chars.count == 1 }
+
     var body: some View {
         VStack(spacing: 0) {
             header
 
-            // Main Content
+            // Prompt sits centered on the screen regardless of device width.
+            promptBlock
+                .padding(.top, 20)
+                .padding(.horizontal, 40)
+
+            // Writing pad stays left-of-center; the open zone beside it is
+            // where the writing hand rests.
             HStack(spacing: 40) {
                 writingColumn
-                infoColumn
+                handRestZone
             }
-            .padding(40)
+            .padding(.horizontal, 40)
+            .padding(.top, 12)
+
+            Spacer(minLength: 8)
+
+            // Stats / done card is centered on the screen as well.
+            statsCard
+                .frame(width: 460)
+                .padding(.bottom, 20)
         }
         .background(InkTheme.paper.ignoresSafeArea())
         .onAppear { setupCharacter() }
@@ -104,13 +122,19 @@ struct PracticeView: View {
 
             Spacer()
 
-            HStack(spacing: 2) {
-                Text("\(currentIndex + 1)")
-                    .font(.inkSerif(size: 22, weight: .bold))
-                    .foregroundColor(InkTheme.ink)
-                Text(" / \(deck.chars.count)")
-                    .font(.inkSerif(size: 22))
+            if isEndless {
+                Text("Endless practice")
+                    .font(.inkSans(size: 13, weight: .semibold))
                     .foregroundColor(InkTheme.ink3)
+            } else {
+                HStack(spacing: 2) {
+                    Text("\(currentIndex + 1)")
+                        .font(.inkSerif(size: 22, weight: .bold))
+                        .foregroundColor(InkTheme.ink)
+                    Text(" / \(deck.chars.count)")
+                        .font(.inkSerif(size: 22))
+                        .foregroundColor(InkTheme.ink3)
+                }
             }
         }
         .padding(.horizontal, 32)
@@ -167,27 +191,43 @@ struct PracticeView: View {
                 .fill(InkTheme.card.opacity(0.92))
 
             VStack(spacing: 12) {
-                Circle()
-                    .fill(InkTheme.accent)
-                    .frame(width: 56, height: 56)
-                    .overlay(
-                        Image(systemName: isSkipped ? "arrow.right" : "checkmark")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.white)
-                    )
+                // Endless (single-character) practice loops via replay; a deck
+                // offers both replay and advancing to the next character.
+                HStack(spacing: 16) {
+                    if isEndless {
+                        veilButton(icon: "arrow.counterclockwise", prominent: true, action: restartCurrent)
+                    } else {
+                        veilButton(icon: "arrow.counterclockwise", prominent: false, action: restartCurrent)
+                        veilButton(icon: "arrow.right", prominent: true, action: nextCharacter)
+                    }
+                }
 
                 Text(isSkipped ? "Skipped" : (mistakes == 0 ? "Perfect" : "Well written"))
                     .font(.inkSerif(size: 28, weight: .bold))
                     .foregroundColor(InkTheme.ink)
 
                 Text(isSkipped
-                     ? "come back to this one"
+                     ? (isEndless ? "replay to try it again" : "come back to this one")
                      : (mistakes == 0
                         ? "clean stroke order"
                         : "\(mistakes) stroke correction\(mistakes == 1 ? "" : "s")"))
                     .font(.inkSans(size: 14))
                     .foregroundColor(InkTheme.ink2)
             }
+        }
+    }
+
+    private func veilButton(icon: String, prominent: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Circle()
+                .fill(prominent ? InkTheme.accent : InkTheme.line2)
+                .frame(width: 56, height: 56)
+                .overlay(
+                    Image(systemName: icon)
+                        .font(.system(size: 22, weight: .bold))
+                        // .white is correct on the saturated accent fill only.
+                        .foregroundColor(prominent ? .white : InkTheme.ink)
+                )
         }
     }
 
@@ -223,7 +263,7 @@ struct PracticeView: View {
             Button(action: isDone ? nextCharacter : skipCharacter) {
                 HStack(spacing: 6) {
                     Image(systemName: "forward.fill").font(.system(size: 12))
-                    Text(isDone ? "Next" : "Skip").font(.inkSans(size: 13, weight: .semibold))
+                    Text(isDone ? (isEndless ? "Finish" : "Next") : "Skip").font(.inkSans(size: 13, weight: .semibold))
                 }
                 .foregroundColor(InkTheme.ink2)
                 .padding(.horizontal, 14)
@@ -234,52 +274,50 @@ struct PracticeView: View {
         .frame(width: 480)
     }
 
-    // MARK: - Info column
+    // MARK: - Prompt (centered on screen)
 
-    private var infoColumn: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("WRITE THIS CHARACTER")
-                    .font(.inkSans(size: 12, weight: .bold))
-                    .foregroundColor(InkTheme.accent)
-                    .tracking(1.2)
+    private var promptBlock: some View {
+        VStack(spacing: 10) {
+            Text("WRITE THIS CHARACTER")
+                .font(.inkSans(size: 12, weight: .bold))
+                .foregroundColor(InkTheme.accent)
+                .tracking(1.2)
 
-                Text(currentItem.meaning.isEmpty ? "Reference Glyph" : currentItem.meaning)
-                    .font(.inkSerif(size: 42, weight: .bold))
-                    .foregroundColor(InkTheme.ink)
+            Text(currentItem.meaning.isEmpty ? "Reference Glyph" : currentItem.meaning)
+                .font(.inkSerif(size: 42, weight: .bold))
+                .foregroundColor(InkTheme.ink)
 
-                if !currentItem.reading.isEmpty {
-                    Text(currentItem.reading)
-                        .font(.inkSans(size: 20))
-                        .foregroundColor(InkTheme.ink2)
-                }
-
-                HStack(spacing: 8) {
-                    Text(deck.lang == .chinese ? "Simplified" : "Japanese")
-                        .font(.inkSans(size: 12, weight: .medium))
-                        .foregroundColor(InkTheme.ink3)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(InkTheme.line2.opacity(0.5))
-                        .cornerRadius(16)
-                }
+            if !currentItem.reading.isEmpty {
+                Text(currentItem.reading)
+                    .font(.inkSans(size: 20))
+                    .foregroundColor(InkTheme.ink2)
             }
 
-            Spacer()
+            Text(deck.lang == .chinese ? "Simplified" : "Japanese")
+                .font(.inkSans(size: 12, weight: .medium))
+                .foregroundColor(InkTheme.ink3)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(InkTheme.line2.opacity(0.5))
+                .cornerRadius(16)
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+    }
 
+    // MARK: - Hand-rest zone
+
+    /// The open region beside the writing pad, reserved for the writing hand.
+    private var handRestZone: some View {
+        ZStack {
             if !isDone {
                 HandRestGuideView()
-                    .frame(maxWidth: .infinity)
                     .opacity(handGuideDimmed ? 0.35 : 1.0)
                     .animation(.easeOut(duration: 0.6), value: handGuideDimmed)
                     .accessibilityHidden(true)
-
-                Spacer()
             }
-
-            statsCard
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// Shown when stroke data was assembled via IDS decomposition rather than
