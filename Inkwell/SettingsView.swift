@@ -231,6 +231,29 @@ struct SettingsView: View {
                 Divider().background(InkTheme.line)
 
                 VStack(alignment: .leading, spacing: 6) {
+                    Text("PRIVACY")
+                        .font(.inkSans(size: 11, weight: .bold))
+                        .foregroundColor(InkTheme.ink3)
+                        .tracking(1.0)
+                    Text("Everything stays on this iPad. Inkwell has no accounts, collects no data, and never connects to a server.")
+                        .font(.inkSans(size: 13))
+                        .foregroundColor(InkTheme.ink2)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Link(destination: URL(string: "https://github.com/tsainez/Inkwell/blob/main/docs/PRIVACY.md")!) {
+                        HStack(spacing: 5) {
+                            Text("Read the privacy policy")
+                                .font(.inkSans(size: 13, weight: .semibold))
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 10, weight: .bold))
+                        }
+                        .foregroundColor(InkTheme.accent)
+                    }
+                }
+
+                Divider().background(InkTheme.line)
+
+                VStack(alignment: .leading, spacing: 6) {
                     Text("STROKE DATA")
                         .font(.inkSans(size: 11, weight: .bold))
                         .foregroundColor(InkTheme.ink3)
