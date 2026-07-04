@@ -37,6 +37,10 @@ struct PracticeView: View {
     @State private var feedback: String? = nil         // transient correction message
     @State private var demoTask: Task<Void, Never>? = nil
 
+    // The palm-rest guide starts prominent and dims for the rest of the
+    // session once the user has actually put pen to canvas.
+    @State private var handGuideDimmed: Bool = false
+
     // Geometry of the writing pad. The outline, the reference medians, and the
     // user's pen samples all share this coordinate space so grading is fair.
     private let padSide: CGFloat = 440
@@ -50,16 +54,34 @@ struct PracticeView: View {
     private var leniency: CGFloat { strict ? 1.0 : 1.6 }
     private var strokesLeft: Int { max(0, totalStrokes - expectedIndex) }
 
+    /// A single-character session loops forever: the done state offers replay
+    /// instead of advancing, and the user leaves via "Finish session".
+    private var isEndless: Bool { deck.chars.count == 1 }
+
     var body: some View {
         VStack(spacing: 0) {
             header
 
-            // Main Content
+            // Prompt sits centered on the screen regardless of device width.
+            promptBlock
+                .padding(.top, 20)
+                .padding(.horizontal, 40)
+
+            // Writing pad stays left-of-center; the open zone beside it is
+            // where the writing hand rests.
             HStack(spacing: 40) {
                 writingColumn
-                infoColumn
+                handRestZone
             }
-            .padding(40)
+            .padding(.horizontal, 40)
+            .padding(.top, 12)
+
+            Spacer(minLength: 8)
+
+            // Stats / done card is centered on the screen as well.
+            statsCard
+                .frame(width: 460)
+                .padding(.bottom, 20)
         }
         .background(InkTheme.paper.ignoresSafeArea())
         .onAppear { setupCharacter() }
@@ -100,13 +122,19 @@ struct PracticeView: View {
 
             Spacer()
 
-            HStack(spacing: 2) {
-                Text("\(currentIndex + 1)")
-                    .font(.inkSerif(size: 22, weight: .bold))
-                    .foregroundColor(InkTheme.ink)
-                Text(" / \(deck.chars.count)")
-                    .font(.inkSerif(size: 22))
+            if isEndless {
+                Text("Endless practice")
+                    .font(.inkSans(size: 13, weight: .semibold))
                     .foregroundColor(InkTheme.ink3)
+            } else {
+                HStack(spacing: 2) {
+                    Text("\(currentIndex + 1)")
+                        .font(.inkSerif(size: 22, weight: .bold))
+                        .foregroundColor(InkTheme.ink)
+                    Text(" / \(deck.chars.count)")
+                        .font(.inkSerif(size: 22))
+                        .foregroundColor(InkTheme.ink3)
+                }
             }
         }
         .padding(.horizontal, 32)
@@ -163,27 +191,43 @@ struct PracticeView: View {
                 .fill(InkTheme.card.opacity(0.92))
 
             VStack(spacing: 12) {
-                Circle()
-                    .fill(InkTheme.accent)
-                    .frame(width: 56, height: 56)
-                    .overlay(
-                        Image(systemName: isSkipped ? "arrow.right" : "checkmark")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.white)
-                    )
+                // Endless (single-character) practice loops via replay; a deck
+                // offers both replay and advancing to the next character.
+                HStack(spacing: 16) {
+                    if isEndless {
+                        veilButton(icon: "arrow.counterclockwise", prominent: true, action: restartCurrent)
+                    } else {
+                        veilButton(icon: "arrow.counterclockwise", prominent: false, action: restartCurrent)
+                        veilButton(icon: "arrow.right", prominent: true, action: nextCharacter)
+                    }
+                }
 
                 Text(isSkipped ? "Skipped" : (mistakes == 0 ? "Perfect" : "Well written"))
                     .font(.inkSerif(size: 28, weight: .bold))
                     .foregroundColor(InkTheme.ink)
 
                 Text(isSkipped
-                     ? "come back to this one"
+                     ? (isEndless ? "replay to try it again" : "come back to this one")
                      : (mistakes == 0
                         ? "clean stroke order"
                         : "\(mistakes) stroke correction\(mistakes == 1 ? "" : "s")"))
                     .font(.inkSans(size: 14))
                     .foregroundColor(InkTheme.ink2)
             }
+        }
+    }
+
+    private func veilButton(icon: String, prominent: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Circle()
+                .fill(prominent ? InkTheme.accent : InkTheme.line2)
+                .frame(width: 56, height: 56)
+                .overlay(
+                    Image(systemName: icon)
+                        .font(.system(size: 22, weight: .bold))
+                        // .white is correct on the saturated accent fill only.
+                        .foregroundColor(prominent ? .white : InkTheme.ink)
+                )
         }
     }
 
@@ -219,7 +263,7 @@ struct PracticeView: View {
             Button(action: isDone ? nextCharacter : skipCharacter) {
                 HStack(spacing: 6) {
                     Image(systemName: "forward.fill").font(.system(size: 12))
-                    Text(isDone ? "Next" : "Skip").font(.inkSans(size: 13, weight: .semibold))
+                    Text(isDone ? (isEndless ? "Finish" : "Next") : "Skip").font(.inkSans(size: 13, weight: .semibold))
                 }
                 .foregroundColor(InkTheme.ink2)
                 .padding(.horizontal, 14)
@@ -230,42 +274,50 @@ struct PracticeView: View {
         .frame(width: 480)
     }
 
-    // MARK: - Info column
+    // MARK: - Prompt (centered on screen)
 
-    private var infoColumn: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("WRITE THIS CHARACTER")
-                    .font(.inkSans(size: 12, weight: .bold))
-                    .foregroundColor(InkTheme.accent)
-                    .tracking(1.2)
+    private var promptBlock: some View {
+        VStack(spacing: 10) {
+            Text("WRITE THIS CHARACTER")
+                .font(.inkSans(size: 12, weight: .bold))
+                .foregroundColor(InkTheme.accent)
+                .tracking(1.2)
 
-                Text(currentItem.meaning.isEmpty ? "Reference Glyph" : currentItem.meaning)
-                    .font(.inkSerif(size: 42, weight: .bold))
-                    .foregroundColor(InkTheme.ink)
+            Text(currentItem.meaning.isEmpty ? "Reference Glyph" : currentItem.meaning)
+                .font(.inkSerif(size: 42, weight: .bold))
+                .foregroundColor(InkTheme.ink)
 
-                if !currentItem.reading.isEmpty {
-                    Text(currentItem.reading)
-                        .font(.inkSans(size: 20))
-                        .foregroundColor(InkTheme.ink2)
-                }
-
-                HStack(spacing: 8) {
-                    Text(deck.lang == .chinese ? "Simplified" : "Japanese")
-                        .font(.inkSans(size: 12, weight: .medium))
-                        .foregroundColor(InkTheme.ink3)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(InkTheme.line2.opacity(0.5))
-                        .cornerRadius(16)
-                }
+            if !currentItem.reading.isEmpty {
+                Text(currentItem.reading)
+                    .font(.inkSans(size: 20))
+                    .foregroundColor(InkTheme.ink2)
             }
 
-            Spacer()
-
-            statsCard
+            Text(deck.lang == .chinese ? "Simplified" : "Japanese")
+                .font(.inkSans(size: 12, weight: .medium))
+                .foregroundColor(InkTheme.ink3)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(InkTheme.line2.opacity(0.5))
+                .cornerRadius(16)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Hand-rest zone
+
+    /// The open region beside the writing pad, reserved for the writing hand.
+    private var handRestZone: some View {
+        ZStack {
+            if !isDone {
+                HandRestGuideView()
+                    .opacity(handGuideDimmed ? 0.35 : 1.0)
+                    .animation(.easeOut(duration: 0.6), value: handGuideDimmed)
+                    .accessibilityHidden(true)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     /// Shown when stroke data was assembled via IDS decomposition rather than
@@ -383,6 +435,7 @@ struct PracticeView: View {
     /// Grade a finished user stroke against the expected next stroke.
     private func handleStroke(_ canvasPoints: [CGPoint]) {
         guard !isDone else { return }
+        if !handGuideDimmed { handGuideDimmed = true }
         guard let data = strokeData, expectedIndex < data.medians.count else { return }
 
         let userBox = canvasPoints.map { metrics.boxPoint(canvas: $0) }
@@ -506,5 +559,63 @@ struct PracticeView: View {
         } else {
             currentIndex += 1   // triggers setupCharacter() via onChange
         }
+    }
+}
+
+// MARK: - Palm-rest guide
+
+/// Ergonomic hint for the deliberately asymmetric practice layout: the open
+/// region beside the writing pad exists so the writing hand has somewhere to
+/// land, and this guide makes that affordance visible. Purely decorative —
+/// the drawing surface only covers the pad itself, so a hand resting here
+/// never produces strokes.
+struct HandRestGuideView: View {
+    var body: some View {
+        VStack(spacing: 18) {
+            PalmRestShape()
+                .stroke(
+                    InkTheme.ink3,
+                    style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [6, 6])
+                )
+                .background(PalmRestShape().fill(InkTheme.line2.opacity(0.4)))
+                .frame(width: 170, height: 195)
+                .rotationEffect(.degrees(-12))   // lean the hand toward the pad
+
+            VStack(spacing: 8) {
+                Image(systemName: "hand.draw")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(InkTheme.ink3)
+
+                Text("REST YOUR PALM HERE")
+                    .font(.inkSans(size: 11, weight: .bold))
+                    .tracking(1.2)
+                    .foregroundColor(InkTheme.ink3)
+            }
+        }
+    }
+}
+
+/// Stylized outline of a relaxed right hand seen from above — fingers curled
+/// around a pen, pinky edge and palm heel down — drawn in a unit square and
+/// scaled to whatever frame it's given.
+struct PalmRestShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: rect.minX + x * rect.width, y: rect.minY + y * rect.height)
+        }
+
+        var p = Path()
+        p.move(to: pt(0.42, 0.98))                                                            // wrist, thumb side
+        p.addCurve(to: pt(0.22, 0.60), control1: pt(0.34, 0.90), control2: pt(0.24, 0.74))    // up the thumb side
+        p.addCurve(to: pt(0.10, 0.42), control1: pt(0.20, 0.52), control2: pt(0.10, 0.50))    // out to the thumb
+        p.addCurve(to: pt(0.20, 0.26), control1: pt(0.10, 0.34), control2: pt(0.13, 0.28))    // around the thumb tip
+        p.addCurve(to: pt(0.34, 0.30), control1: pt(0.26, 0.25), control2: pt(0.31, 0.27))    // back into the web
+        p.addCurve(to: pt(0.44, 0.10), control1: pt(0.36, 0.22), control2: pt(0.38, 0.14))    // up to the index knuckle
+        p.addCurve(to: pt(0.72, 0.05), control1: pt(0.52, 0.04), control2: pt(0.64, 0.02))    // across the curled fingers
+        p.addCurve(to: pt(0.90, 0.24), control1: pt(0.82, 0.09), control2: pt(0.88, 0.15))    // over the pinky knuckle
+        p.addCurve(to: pt(0.97, 0.62), control1: pt(0.94, 0.36), control2: pt(0.97, 0.48))    // down the pinky edge
+        p.addCurve(to: pt(0.88, 0.98), control1: pt(0.97, 0.76), control2: pt(0.94, 0.90))    // heel of the palm
+        p.closeSubpath()                                                                      // across the wrist
+        return p
     }
 }
