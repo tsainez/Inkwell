@@ -251,15 +251,6 @@ struct PracticeView: View {
                 }
 
                 HStack(spacing: 8) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "speaker.wave.2.fill").font(.system(size: 12))
-                        Text("Audio").font(.inkSans(size: 12, weight: .semibold))
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(InkTheme.line2)
-                    .cornerRadius(16)
-
                     Text(deck.lang == .chinese ? "Simplified" : "Japanese")
                         .font(.inkSans(size: 12, weight: .medium))
                         .foregroundColor(InkTheme.ink3)
