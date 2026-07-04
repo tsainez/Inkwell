@@ -37,6 +37,10 @@ struct PracticeView: View {
     @State private var feedback: String? = nil         // transient correction message
     @State private var demoTask: Task<Void, Never>? = nil
 
+    // The palm-rest guide starts prominent and dims for the rest of the
+    // session once the user has actually put pen to canvas.
+    @State private var handGuideDimmed: Bool = false
+
     // Geometry of the writing pad. The outline, the reference medians, and the
     // user's pen samples all share this coordinate space so grading is fair.
     private let padSide: CGFloat = 440
@@ -263,6 +267,16 @@ struct PracticeView: View {
 
             Spacer()
 
+            if !isDone {
+                HandRestGuideView()
+                    .frame(maxWidth: .infinity)
+                    .opacity(handGuideDimmed ? 0.35 : 1.0)
+                    .animation(.easeOut(duration: 0.6), value: handGuideDimmed)
+                    .accessibilityHidden(true)
+
+                Spacer()
+            }
+
             statsCard
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -383,6 +397,7 @@ struct PracticeView: View {
     /// Grade a finished user stroke against the expected next stroke.
     private func handleStroke(_ canvasPoints: [CGPoint]) {
         guard !isDone else { return }
+        if !handGuideDimmed { handGuideDimmed = true }
         guard let data = strokeData, expectedIndex < data.medians.count else { return }
 
         let userBox = canvasPoints.map { metrics.boxPoint(canvas: $0) }
@@ -506,5 +521,63 @@ struct PracticeView: View {
         } else {
             currentIndex += 1   // triggers setupCharacter() via onChange
         }
+    }
+}
+
+// MARK: - Palm-rest guide
+
+/// Ergonomic hint for the deliberately asymmetric practice layout: the open
+/// region beside the writing pad exists so the writing hand has somewhere to
+/// land, and this guide makes that affordance visible. Purely decorative —
+/// the drawing surface only covers the pad itself, so a hand resting here
+/// never produces strokes.
+struct HandRestGuideView: View {
+    var body: some View {
+        VStack(spacing: 18) {
+            PalmRestShape()
+                .stroke(
+                    InkTheme.ink3,
+                    style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [6, 6])
+                )
+                .background(PalmRestShape().fill(InkTheme.line2.opacity(0.4)))
+                .frame(width: 170, height: 195)
+                .rotationEffect(.degrees(-12))   // lean the hand toward the pad
+
+            VStack(spacing: 8) {
+                Image(systemName: "hand.draw")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(InkTheme.ink3)
+
+                Text("REST YOUR PALM HERE")
+                    .font(.inkSans(size: 11, weight: .bold))
+                    .tracking(1.2)
+                    .foregroundColor(InkTheme.ink3)
+            }
+        }
+    }
+}
+
+/// Stylized outline of a relaxed right hand seen from above — fingers curled
+/// around a pen, pinky edge and palm heel down — drawn in a unit square and
+/// scaled to whatever frame it's given.
+struct PalmRestShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: rect.minX + x * rect.width, y: rect.minY + y * rect.height)
+        }
+
+        var p = Path()
+        p.move(to: pt(0.42, 0.98))                                                            // wrist, thumb side
+        p.addCurve(to: pt(0.22, 0.60), control1: pt(0.34, 0.90), control2: pt(0.24, 0.74))    // up the thumb side
+        p.addCurve(to: pt(0.10, 0.42), control1: pt(0.20, 0.52), control2: pt(0.10, 0.50))    // out to the thumb
+        p.addCurve(to: pt(0.20, 0.26), control1: pt(0.10, 0.34), control2: pt(0.13, 0.28))    // around the thumb tip
+        p.addCurve(to: pt(0.34, 0.30), control1: pt(0.26, 0.25), control2: pt(0.31, 0.27))    // back into the web
+        p.addCurve(to: pt(0.44, 0.10), control1: pt(0.36, 0.22), control2: pt(0.38, 0.14))    // up to the index knuckle
+        p.addCurve(to: pt(0.72, 0.05), control1: pt(0.52, 0.04), control2: pt(0.64, 0.02))    // across the curled fingers
+        p.addCurve(to: pt(0.90, 0.24), control1: pt(0.82, 0.09), control2: pt(0.88, 0.15))    // over the pinky knuckle
+        p.addCurve(to: pt(0.97, 0.62), control1: pt(0.94, 0.36), control2: pt(0.97, 0.48))    // down the pinky edge
+        p.addCurve(to: pt(0.88, 0.98), control1: pt(0.97, 0.76), control2: pt(0.94, 0.90))    // heel of the palm
+        p.closeSubpath()                                                                      // across the wrist
+        return p
     }
 }
