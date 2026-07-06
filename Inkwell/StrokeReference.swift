@@ -156,7 +156,17 @@ struct GlyphMetrics: Equatable {
 /// stroke data (commands M, L, Q, C, Z). Each coordinate is mapped through
 /// `transform` so the resulting `Path` is already in canvas space.
 enum SVGPath {
-    static func path(from d: String, transform: (CGFloat, CGFloat) -> CGPoint) -> Path {
+    private static var cache: [String: Path] = [:]
+    private static let lock = NSLock()
+
+    static func path(from d: String) -> Path {
+        lock.lock()
+        if let cached = cache[d] {
+            lock.unlock()
+            return cached
+        }
+        lock.unlock()
+
         var path = Path()
         let tokens = tokenize(d)
         var index = 0
@@ -183,29 +193,29 @@ enum SVGPath {
 
             switch command {
             case "M":
-                let p = transform(number(), number())
+                let p = CGPoint(x: number(), y: number())
                 path.move(to: p); current = p; start = p
                 // Extra coordinate pairs after an M are implicit line-tos.
                 while peekIsNumber() {
-                    let q = transform(number(), number())
+                    let q = CGPoint(x: number(), y: number())
                     path.addLine(to: q); current = q
                 }
             case "L":
                 while peekIsNumber() {
-                    let q = transform(number(), number())
+                    let q = CGPoint(x: number(), y: number())
                     path.addLine(to: q); current = q
                 }
             case "Q":
                 while peekIsNumber() {
-                    let c = transform(number(), number())
-                    let end = transform(number(), number())
+                    let c = CGPoint(x: number(), y: number())
+                    let end = CGPoint(x: number(), y: number())
                     path.addQuadCurve(to: end, control: c); current = end
                 }
             case "C":
                 while peekIsNumber() {
-                    let c1 = transform(number(), number())
-                    let c2 = transform(number(), number())
-                    let end = transform(number(), number())
+                    let c1 = CGPoint(x: number(), y: number())
+                    let c2 = CGPoint(x: number(), y: number())
+                    let end = CGPoint(x: number(), y: number())
                     path.addCurve(to: end, control1: c1, control2: c2); current = end
                 }
             case "Z", "z":
@@ -214,6 +224,11 @@ enum SVGPath {
                 break
             }
         }
+
+        lock.lock()
+        cache[d] = path
+        lock.unlock()
+
         return path
     }
 

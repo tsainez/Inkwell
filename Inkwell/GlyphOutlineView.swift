@@ -30,10 +30,11 @@ struct GlyphOutlineView: View {
             // so they read clearly even though they lack filled brush outlines.
             let strokeWidth: CGFloat = isSynthesized ? metrics.scale * 38 : 0
 
+            let transform = CGAffineTransform(scaleX: metrics.scale, y: -metrics.scale)
+                .concatenating(CGAffineTransform(translationX: metrics.inset, y: metrics.inset + GlyphMetrics.baseline * metrics.scale))
+
             for (i, definition) in strokeData.strokes.enumerated() {
-                let path = SVGPath.path(from: definition) { x, y in
-                    metrics.canvasPoint(rawX: x, rawY: y)
-                }
+                let path = SVGPath.path(from: definition).applying(transform)
 
                 let color: Color
                 if highlightIndex == i {
