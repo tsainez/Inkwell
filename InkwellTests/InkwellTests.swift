@@ -337,15 +337,15 @@ struct SVGPathTests {
     private func identity(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x, y: y) }
 
     @Test func emptyStringProducesEmptyPath() {
-        #expect(SVGPath.path(from: "", transform: identity).isEmpty)
+        #expect(SVGPath.path(from: "").isEmpty)
     }
 
     @Test func moveAndLineProducesNonEmptyPath() {
-        #expect(!SVGPath.path(from: "M 0 0 L 100 100", transform: identity).isEmpty)
+        #expect(!SVGPath.path(from: "M 0 0 L 100 100").isEmpty)
     }
 
     @Test func moveCommandPositionsStartCorrectly() {
-        let path = SVGPath.path(from: "M 50 80 L 150 80", transform: identity)
+        let path = SVGPath.path(from: "M 50 80 L 150 80")
         let bounds = path.boundingRect
         #expect(bounds.minX <= 50 + 0.5)
         #expect(bounds.maxX >= 150 - 0.5)
@@ -353,30 +353,30 @@ struct SVGPathTests {
 
     @Test func implicitLineTosAfterMMatchExplicitL() {
         // "M x1 y1 x2 y2" — the second coordinate pair is an implicit line-to.
-        let explicit = SVGPath.path(from: "M 0 0 L 100 0", transform: identity)
-        let implicit = SVGPath.path(from: "M 0 0 100 0", transform: identity)
+        let explicit = SVGPath.path(from: "M 0 0 L 100 0")
+        let implicit = SVGPath.path(from: "M 0 0 100 0")
         let diff = abs(explicit.boundingRect.maxX - implicit.boundingRect.maxX)
         #expect(diff < 0.5)
     }
 
     @Test func quadraticCurveProducesCorrectBounds() {
-        let path = SVGPath.path(from: "M 0 0 Q 50 100 100 0", transform: identity)
+        let path = SVGPath.path(from: "M 0 0 Q 50 100 100 0")
         #expect(!path.isEmpty)
         #expect(path.boundingRect.maxX >= 100 - 0.5)
     }
 
     @Test func cubicCurveProducesNonEmptyPath() {
-        #expect(!SVGPath.path(from: "M 0 0 C 0 50 100 50 100 0", transform: identity).isEmpty)
+        #expect(!SVGPath.path(from: "M 0 0 C 0 50 100 50 100 0").isEmpty)
     }
 
     @Test func closeSubpathZProducesNonEmptyPath() {
-        let path = SVGPath.path(from: "M 0 0 L 100 0 L 100 100 Z", transform: identity)
+        let path = SVGPath.path(from: "M 0 0 L 100 0 L 100 100 Z")
         #expect(!path.isEmpty)
     }
 
     @Test func negativeCoordsTokenizedCorrectly() {
         // "100-50" must be split into 100 and -50 by the tokenizer.
-        let path = SVGPath.path(from: "M 100-50 L 200-50", transform: identity)
+        let path = SVGPath.path(from: "M 100-50 L 200-50")
         let bounds = path.boundingRect
         #expect(abs(bounds.midY - (-50)) < 1)
         #expect(abs(bounds.minX - 100) < 1)
@@ -384,24 +384,24 @@ struct SVGPathTests {
     }
 
     @Test func commaSeparatorsEquivalentToSpaces() {
-        let withSpaces = SVGPath.path(from: "M 10 20 L 30 40", transform: identity)
-        let withCommas = SVGPath.path(from: "M 10,20 L 30,40", transform: identity)
+        let withSpaces = SVGPath.path(from: "M 10 20 L 30 40")
+        let withCommas = SVGPath.path(from: "M 10,20 L 30,40")
         #expect(abs(withSpaces.boundingRect.minX - withCommas.boundingRect.minX) < 0.5)
         #expect(abs(withSpaces.boundingRect.minY - withCommas.boundingRect.minY) < 0.5)
     }
 
     @Test func chainedQuadraticCurvesAllRendered() {
         // Q with multiple control+end pairs — both curves should extend the path.
-        let path = SVGPath.path(from: "M 0 0 Q 25 50 50 0 75 -50 100 0", transform: identity)
+        let path = SVGPath.path(from: "M 0 0 Q 25 50 50 0 75 -50 100 0")
         #expect(!path.isEmpty)
         #expect(path.boundingRect.maxX >= 100 - 0.5)
     }
 
     @Test func transformIsApplied() {
         // A transform that doubles all coordinates should double the bounding rect.
-        let scale: (CGFloat, CGFloat) -> CGPoint = { CGPoint(x: $0 * 2, y: $1 * 2) }
-        let normal = SVGPath.path(from: "M 0 0 L 100 0", transform: identity)
-        let scaled = SVGPath.path(from: "M 0 0 L 100 0", transform: scale)
+        let normal = SVGPath.path(from: "M 0 0 L 100 0")
+        let scale = CGAffineTransform(scaleX: 2, y: 2)
+        let scaled = SVGPath.path(from: "M 0 0 L 100 0").applying(scale)
         #expect(abs(scaled.boundingRect.maxX - normal.boundingRect.maxX * 2) < 0.5)
     }
 }

@@ -171,7 +171,6 @@ enum SVGPath {
         let tokens = tokenize(d)
         var index = 0
         var start = CGPoint.zero
-        var current = CGPoint.zero
 
         func peekIsNumber() -> Bool {
             guard index < tokens.count else { return false }
@@ -194,32 +193,32 @@ enum SVGPath {
             switch command {
             case "M":
                 let p = CGPoint(x: number(), y: number())
-                path.move(to: p); current = p; start = p
+                path.move(to: p); start = p
                 // Extra coordinate pairs after an M are implicit line-tos.
                 while peekIsNumber() {
                     let q = CGPoint(x: number(), y: number())
-                    path.addLine(to: q); current = q
+                    path.addLine(to: q)
                 }
             case "L":
                 while peekIsNumber() {
                     let q = CGPoint(x: number(), y: number())
-                    path.addLine(to: q); current = q
+                    path.addLine(to: q)
                 }
             case "Q":
                 while peekIsNumber() {
                     let c = CGPoint(x: number(), y: number())
                     let end = CGPoint(x: number(), y: number())
-                    path.addQuadCurve(to: end, control: c); current = end
+                    path.addQuadCurve(to: end, control: c)
                 }
             case "C":
                 while peekIsNumber() {
                     let c1 = CGPoint(x: number(), y: number())
                     let c2 = CGPoint(x: number(), y: number())
                     let end = CGPoint(x: number(), y: number())
-                    path.addCurve(to: end, control1: c1, control2: c2); current = end
+                    path.addCurve(to: end, control1: c1, control2: c2)
                 }
             case "Z", "z":
-                path.closeSubpath(); current = start
+                path.closeSubpath()
             default:
                 break
             }
