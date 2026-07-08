@@ -193,6 +193,7 @@ struct LibraryView: View {
                                     .background(InkTheme.ink)
                                     .cornerRadius(10)
                             }
+                            .accessibilityLabel("Start practice")
                             .disabled(buildCustomDeck() == nil)
                             .opacity(buildCustomDeck() == nil ? 0.4 : 1.0)
                         }

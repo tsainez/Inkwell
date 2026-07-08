@@ -281,6 +281,7 @@ struct CharacterTableView: View {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(InkTheme.ink3)
                         }
+                        .accessibilityLabel("Clear search")
                     }
                 }
                 .padding(.horizontal, 14)

@@ -102,6 +102,7 @@ struct PracticeView: View {
                     .cornerRadius(10)
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
             }
+            .accessibilityLabel("Exit practice")
 
             Spacer()
 
@@ -195,10 +196,10 @@ struct PracticeView: View {
                 // offers both replay and advancing to the next character.
                 HStack(spacing: 16) {
                     if isEndless {
-                        veilButton(icon: "arrow.counterclockwise", prominent: true, action: restartCurrent)
+                        veilButton(icon: "arrow.counterclockwise", prominent: true, accessibilityLabel: "Restart", action: restartCurrent)
                     } else {
-                        veilButton(icon: "arrow.counterclockwise", prominent: false, action: restartCurrent)
-                        veilButton(icon: "arrow.right", prominent: true, action: nextCharacter)
+                        veilButton(icon: "arrow.counterclockwise", prominent: false, accessibilityLabel: "Restart", action: restartCurrent)
+                        veilButton(icon: "arrow.right", prominent: true, accessibilityLabel: "Next character", action: nextCharacter)
                     }
                 }
 
@@ -217,7 +218,7 @@ struct PracticeView: View {
         }
     }
 
-    private func veilButton(icon: String, prominent: Bool, action: @escaping () -> Void) -> some View {
+    private func veilButton(icon: String, prominent: Bool, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Circle()
                 .fill(prominent ? InkTheme.accent : InkTheme.line2)
@@ -229,6 +230,7 @@ struct PracticeView: View {
                         .foregroundColor(prominent ? .white : InkTheme.ink)
                 )
         }
+        .accessibilityLabel(accessibilityLabel)
     }
 
     private var controlsRow: some View {

@@ -1,0 +1,3 @@
+## 2024-07-08 - Missing Accessibility Labels on Icon-only Buttons
+**Learning:** In SwiftUI, icon-only buttons created with `Button` and `Image(systemName:)` lack accessibility labels by default. The pattern is widespread in Inkwell (e.g., custom practice start button, clear search text button, exit and replay/next buttons during practice), rendering them unreadable by VoiceOver.
+**Action:** Always check `Button` definitions for `.accessibilityLabel()` when they contain only an `Image` without accompanying text. Ensure custom button methods, like `veilButton`, accept an accessibility label parameter.
