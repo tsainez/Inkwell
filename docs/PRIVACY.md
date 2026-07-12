@@ -1,3 +1,8 @@
+---
+title: Privacy Policy
+permalink: /privacy/
+---
+
 # Inkwell Privacy Policy
 
 **Effective date:** July 4, 2026

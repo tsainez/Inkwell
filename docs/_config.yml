@@ -1,0 +1,9 @@
+title: Inkwell
+description: Practice Chinese and Japanese character handwriting on iPad — stroke order, direction, and form, graded in real time.
+theme: jekyll-theme-primer
+
+# Internal planning docs — never publish these.
+exclude:
+  - README.md
+  - RELEASE_CHECKLIST.md
+  - DARK_MODE_LIQUID_GLASS_PLAN.md

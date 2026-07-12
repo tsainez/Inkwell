@@ -14,7 +14,7 @@ struct CharacterTableView: View {
     
     @State private var searchText: String = ""
     @State private var selectedFilter: FilterOption = .all
-    @State private var selectedSort: SortOption = .deckOrder
+    @State private var selectedSort: SortOption = .mostPracticed
     @State private var masteryTarget: Int = 10
     
     enum FilterOption: String, CaseIterable, Identifiable {
@@ -28,7 +28,6 @@ struct CharacterTableView: View {
     }
     
     enum SortOption: String, CaseIterable, Identifiable {
-        case deckOrder = "Default Order"
         case mostPracticed = "Most Practiced"
         case accuracy = "Highest Accuracy"
         case lastPracticed = "Recently Practiced"
@@ -113,8 +112,6 @@ struct CharacterTableView: View {
             let progB = progressMap[b.glyph]
             
             switch selectedSort {
-            case .deckOrder:
-                return false // keep natural order
             case .mostPracticed:
                 return (progA?.timesPracticed ?? 0) > (progB?.timesPracticed ?? 0)
             case .accuracy:

@@ -57,6 +57,9 @@ struct GlyphOutlineView: View {
         }
         .frame(width: metrics.size, height: metrics.size)
         .allowsHitTesting(false)
+        // TODO(animation): instead of fading completed strokes in, animate each one
+        // filling along its median path (trim(from:to:) on the median, masked to the
+        // outline) so correct strokes feel like brush ink flowing.
         .animation(.easeInOut(duration: 0.2), value: completedCount)
         .animation(.easeInOut(duration: 0.2), value: highlightIndex)
     }

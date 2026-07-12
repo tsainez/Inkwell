@@ -16,7 +16,8 @@ Licensing:
     described by the upstream projects.
 
 Per the Arphic Public License, attribution is retained here and these notices
-must accompany redistribution. See the upstream repositories for full license
-text.
+must accompany redistribution. The full, unaltered license text is bundled
+alongside this file as `ARPHICPL.txt`, and is also published at
+https://tsainez.github.io/Inkwell/licenses/.
 
 Only the 29 characters required by the bundled practice decks are included.

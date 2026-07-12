@@ -112,6 +112,8 @@ struct PracticeView: View {
                     .tracking(1.0)
 
                 HStack(spacing: 6) {
+                    // TODO(animation): wrap the currentIndex change in a spring so the
+                    // active dot visibly slides/grows instead of snapping.
                     ForEach(0..<deck.chars.count, id: \.self) { i in
                         Capsule()
                             .fill(i < currentIndex ? InkTheme.ink : (i == currentIndex ? InkTheme.accent : InkTheme.line2))
@@ -498,6 +500,8 @@ struct PracticeView: View {
     /// next runloop tick to avoid mutating the drawing from inside its own
     /// change callback.
     private func rejectLastStroke() {
+        // TODO(animation): fade the rejected ink out (~0.3s) instead of popping it,
+        // so a wrong stroke reads as "the paper rejected it" rather than a glitch.
         DispatchQueue.main.async {
             guard !canvasView.drawing.strokes.isEmpty else { return }
             var drawing = canvasView.drawing
@@ -538,6 +542,10 @@ struct PracticeView: View {
     }
 
     private func completeCharacter(mistakesCount: Int) {
+        // TODO(animation): the reward moment. Settle the finished glyph (small
+        // scale-down spring), then stamp SealView into the corner — spring from
+        // ~2.5x scale / 0 opacity with a slight random rotation, hanko-style.
+        // Consider a soft completion sound; most iPads have no haptic engine.
         isDone = true
         results.append(SessionResultItem(glyph: currentItem.glyph, mistakes: mistakesCount, skipped: false))
     }
@@ -554,6 +562,8 @@ struct PracticeView: View {
     }
 
     private func nextCharacter() {
+        // TODO(animation): transition between characters — outgoing glyph slides/
+        // fades out, incoming fades in (.transition keyed on the glyph).
         if currentIndex + 1 >= deck.chars.count {
             onFinish(results)
         } else {

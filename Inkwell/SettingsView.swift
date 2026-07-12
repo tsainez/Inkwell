@@ -240,7 +240,7 @@ struct SettingsView: View {
                         .foregroundColor(InkTheme.ink2)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
-                    Link(destination: URL(string: "https://github.com/tsainez/Inkwell/blob/main/docs/PRIVACY.md")!) {
+                    Link(destination: URL(string: "https://tsainez.github.io/Inkwell/privacy/")!) {
                         HStack(spacing: 5) {
                             Text("Read the privacy policy")
                                 .font(.inkSans(size: 13, weight: .semibold))
@@ -258,11 +258,20 @@ struct SettingsView: View {
                         .font(.inkSans(size: 11, weight: .bold))
                         .foregroundColor(InkTheme.ink3)
                         .tracking(1.0)
-                    Text("Stroke outlines and medians are derived from Make Me a Hanzi / hanzi-writer-data, based on the Arphic PL fonts (AR PL UKai / UMing) under the Arphic Public License. Data and code are provided under the LGPL / MIT licenses of the upstream projects.")
+                    Text("Stroke outlines and medians are derived from Make Me a Hanzi / hanzi-writer-data, based on the Arphic PL fonts (AR PL UKai / UMing) under the Arphic Public License. Data and code are provided under the LGPL / MIT licenses of the upstream projects. The full Arphic Public License text is bundled with the app (ARPHICPL.txt).")
                         .font(.inkSans(size: 13))
                         .foregroundColor(InkTheme.ink2)
                         .lineSpacing(3)
                         .fixedSize(horizontal: false, vertical: true)
+                    Link(destination: URL(string: "https://tsainez.github.io/Inkwell/licenses/")!) {
+                        HStack(spacing: 5) {
+                            Text("View full licenses & attribution")
+                                .font(.inkSans(size: 13, weight: .semibold))
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 10, weight: .bold))
+                        }
+                        .foregroundColor(InkTheme.accent)
+                    }
                 }
             }
         }
