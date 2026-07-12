@@ -74,6 +74,7 @@ struct LibraryView: View {
                             .cornerRadius(20)
                             .overlay(RoundedRectangle(cornerRadius: 20).stroke(InkTheme.line, lineWidth: 1.5))
                         }
+                        .accessibilityLabel("Open Mastery Table")
                         
                         HStack(spacing: 6) {
                             Image(systemName: "flame.fill")
@@ -193,6 +194,7 @@ struct LibraryView: View {
                                     .background(InkTheme.ink)
                                     .cornerRadius(10)
                             }
+                            .accessibilityLabel("Start custom practice")
                             .disabled(buildCustomDeck() == nil)
                             .opacity(buildCustomDeck() == nil ? 0.4 : 1.0)
                         }

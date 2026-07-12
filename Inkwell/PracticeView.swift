@@ -102,6 +102,7 @@ struct PracticeView: View {
                     .cornerRadius(10)
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
             }
+            .accessibilityLabel("Back to Library")
 
             Spacer()
 
@@ -246,6 +247,7 @@ struct PracticeView: View {
                 .background(InkTheme.line2)
                 .cornerRadius(10)
             }
+            .accessibilityLabel("Show stroke order animation")
             .disabled(isDone || strokeData == nil)
 
             Button(action: restartCurrent) {
@@ -259,6 +261,7 @@ struct PracticeView: View {
                 .background(InkTheme.line2)
                 .cornerRadius(10)
             }
+            .accessibilityLabel("Restart current character")
 
             Spacer()
 
@@ -272,6 +275,7 @@ struct PracticeView: View {
                 .padding(.vertical, 10)
                 .background(Color.clear)
             }
+            .accessibilityLabel(isDone ? "Next character" : "Skip character")
         }
         .frame(width: 480)
     }

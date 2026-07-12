@@ -136,6 +136,7 @@ struct SessionCompleteView: View {
                             .background(InkTheme.ink)
                             .cornerRadius(12)
                     }
+                    .accessibilityLabel("Practice again")
                     
                     Button(action: onHome) {
                         HStack(spacing: 6) {
@@ -149,6 +150,7 @@ struct SessionCompleteView: View {
                         .background(InkTheme.line2)
                         .cornerRadius(12)
                     }
+                    .accessibilityLabel("Return to Library")
                 }
             }
             .padding(40)
