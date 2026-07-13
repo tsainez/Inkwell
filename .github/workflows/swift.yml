@@ -35,7 +35,7 @@ jobs:
           xcodebuild test \
             -project Inkwell.xcodeproj \
             -scheme Inkwell \
-            -destination 'platform=iOS Simulator,name=iPad (10th generation)' \
+            -destination 'generic/platform=iOS Simulator' \
             -parallel-testing-enabled NO \
             -enableCodeCoverage YES \
             clean test | xcbeautify
