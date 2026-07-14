@@ -210,6 +210,8 @@ struct PracticeView: View {
                     }
                 }
                 .frame(width: padSide, height: padSide)
+                .scaleEffect(isDone && !isSkipped ? 0.96 : 1.0)
+                .animation(reduceMotion ? .easeOut(duration: 0.2) : .spring(response: 0.3, dampingFraction: 0.6), value: isDone)
 
                 if isDone {
                     doneVeil
@@ -681,7 +683,7 @@ private struct SealStampView: View {
     var body: some View {
         SealView(size: 46)
             .rotationEffect(.degrees(stamped ? tilt : 0))
-            .scaleEffect(stamped || reduceMotion ? 1 : 2.4)
+            .scaleEffect(stamped || reduceMotion ? 1 : 2.5)
             .opacity(stamped ? 1 : 0)
             .onAppear {
                 let stamp: Animation = reduceMotion
