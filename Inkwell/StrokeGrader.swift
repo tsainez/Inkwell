@@ -66,7 +66,12 @@ enum StrokeGrader {
     /// Grade `user` (an ordered list of points in glyph-box space) against the
     /// reference stroke `median` (also in glyph-box space).
     static func judge(user: [CGPoint], median: [CGPoint], config: Config = Config()) -> StrokeJudgment {
-        switch fit(user: user, median: median, config: config) {
+        return judge(fitResult: fit(user: user, median: median, config: config), config: config)
+    }
+
+    /// Helper to grade a stroke from an already computed fit result.
+    private static func judge(fitResult: FitResult, config: Config) -> StrokeJudgment {
+        switch fitResult {
         case .tooShort:
             return .tooShort
         case .degenerate:
@@ -99,9 +104,10 @@ enum StrokeGrader {
         var best: Int?
         var bestScore = CGFloat.greatestFiniteMagnitude
         for (i, median) in medians.enumerated() {
-            guard judge(user: user, median: median, config: config) == .correct else { continue }
-            if case .metrics(let f) = fit(user: user, median: median, config: config),
-               f.forwardMean < bestScore {
+            // ⚡ Bolt: Caching fitResult to avoid redundant computation of fit()
+            let fitResult = fit(user: user, median: median, config: config)
+            guard judge(fitResult: fitResult, config: config) == .correct else { continue }
+            if case .metrics(let f) = fitResult, f.forwardMean < bestScore {
                 bestScore = f.forwardMean
                 best = i
             }

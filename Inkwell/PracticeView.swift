@@ -29,8 +29,6 @@ struct PracticeView: View {
     @AppStorage(AppSettings.Key.gridStyle) private var gridStyleRaw: String = AppSettings.defaultGridStyle.rawValue
     @AppStorage(AppSettings.Key.hintThreshold) private var hintThreshold: Int = AppSettings.defaultHintThreshold
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     // Quiz state
     @State private var expectedIndex: Int = 0          // next stroke the user must write
     @State private var missesOnCurrentStroke: Int = 0  // misses since the last correct stroke
@@ -38,11 +36,6 @@ struct PracticeView: View {
     @State private var demoIndex: Int? = nil           // stroke highlighted by "Show stroke order"
     @State private var feedback: String? = nil         // transient correction message
     @State private var demoTask: Task<Void, Never>? = nil
-
-    // Feedback state
-    @State private var streak = StreakTracker()        // consecutive corrects, session-wide
-    @State private var streakBurst: Int? = nil         // milestone being celebrated, if any
-    @State private var rejectedInks: [RejectedInk] = [] // snapshots of rejected strokes, fading out
 
     // The palm-rest guide starts prominent and dims for the rest of the
     // session once the user has actually put pen to canvas.
@@ -70,15 +63,9 @@ struct PracticeView: View {
             header
 
             // Prompt sits centered on the screen regardless of device width.
-            // ZStack so the outgoing and incoming prompts overlap while they
-            // crossfade instead of stacking in the VStack.
-            ZStack {
-                promptBlock
-                    .id(currentItem.glyph)
-                    .transition(promptTransition)
-            }
-            .padding(.top, 20)
-            .padding(.horizontal, 40)
+            promptBlock
+                .padding(.top, 20)
+                .padding(.horizontal, 40)
 
             // Writing pad stays left-of-center; the open zone beside it is
             // where the writing hand rests.
@@ -102,17 +89,6 @@ struct PracticeView: View {
         .onDisappear { demoTask?.cancel() }
     }
 
-    /// Outgoing prompt drifts left as the new one drifts in from the right —
-    /// a page turning. Plain crossfade under Reduce Motion.
-    private var promptTransition: AnyTransition {
-        reduceMotion
-            ? .opacity
-            : .asymmetric(
-                insertion: .opacity.combined(with: .offset(x: 24)),
-                removal: .opacity.combined(with: .offset(x: -24))
-            )
-    }
-
     // MARK: - Header
 
     private var header: some View {
@@ -126,7 +102,6 @@ struct PracticeView: View {
                     .cornerRadius(10)
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
             }
-            .buttonStyle(InkPressButtonStyle())
             .accessibilityLabel("Back to Library")
 
             Spacer()
@@ -138,15 +113,14 @@ struct PracticeView: View {
                     .tracking(1.0)
 
                 HStack(spacing: 6) {
+                    // TODO(animation): wrap the currentIndex change in a spring so the
+                    // active dot visibly slides/grows instead of snapping.
                     ForEach(0..<deck.chars.count, id: \.self) { i in
                         Capsule()
                             .fill(i < currentIndex ? InkTheme.ink : (i == currentIndex ? InkTheme.accent : InkTheme.line2))
                             .frame(width: i == currentIndex ? 24 : 8, height: 8)
                     }
                 }
-                // The active dot stretches and slides on a spring instead of snapping.
-                .animation(reduceMotion ? .default : .spring(response: 0.4, dampingFraction: 0.7),
-                           value: currentIndex)
             }
 
             Spacer()
@@ -201,25 +175,11 @@ struct PracticeView: View {
                     }
 
                     PencilCanvasView(canvasView: $canvasView, onStrokeFinished: handleStroke)
-
-                    // Rejected strokes fade off the paper here, above the live canvas.
-                    ForEach(rejectedInks) { ink in
-                        FadingInkView(image: ink.image) {
-                            rejectedInks.removeAll { $0.id == ink.id }
-                        }
-                    }
                 }
                 .frame(width: padSide, height: padSide)
 
                 if isDone {
                     doneVeil
-                        .transition(.opacity)
-                }
-
-                // Streak surprise — sits above everything, never blocks input.
-                if let burst = streakBurst {
-                    InkBurstView(streak: burst) { streakBurst = nil }
-                        .id(burst)
                 }
             }
             .frame(width: 480, height: 480)
@@ -258,13 +218,6 @@ struct PracticeView: View {
                     .foregroundColor(InkTheme.ink2)
             }
         }
-        .overlay(alignment: .bottomTrailing) {
-            // A finished character earns its hanko, stamped into the corner.
-            if !isSkipped {
-                SealStampView()
-                    .padding(26)
-            }
-        }
     }
 
     private func veilButton(icon: String, prominent: Bool, action: @escaping () -> Void) -> some View {
@@ -279,7 +232,6 @@ struct PracticeView: View {
                         .foregroundColor(prominent ? .white : InkTheme.ink)
                 )
         }
-        .buttonStyle(InkPressButtonStyle(pressedScale: 0.92))
     }
 
     private var controlsRow: some View {
@@ -295,7 +247,6 @@ struct PracticeView: View {
                 .background(InkTheme.line2)
                 .cornerRadius(10)
             }
-            .buttonStyle(InkPressButtonStyle())
             .accessibilityLabel("Show stroke order animation")
             .disabled(isDone || strokeData == nil)
 
@@ -310,7 +261,6 @@ struct PracticeView: View {
                 .background(InkTheme.line2)
                 .cornerRadius(10)
             }
-            .buttonStyle(InkPressButtonStyle())
             .accessibilityLabel("Restart current character")
 
             Spacer()
@@ -325,7 +275,6 @@ struct PracticeView: View {
                 .padding(.vertical, 10)
                 .background(Color.clear)
             }
-            .buttonStyle(InkPressButtonStyle())
             .accessibilityLabel(isDone ? "Next character" : "Skip character")
         }
         .frame(width: 480)
@@ -477,7 +426,6 @@ struct PracticeView: View {
                         .background(InkTheme.ink)
                         .cornerRadius(12)
                     }
-                    .buttonStyle(InkPressButtonStyle())
                 }
             }
         }
@@ -486,8 +434,6 @@ struct PracticeView: View {
         .background(InkTheme.card)
         .cornerRadius(18)
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(InkTheme.line, lineWidth: 1))
-        // Ease the card's height change when a correction message comes or goes.
-        .animation(.easeInOut(duration: 0.2), value: feedback)
     }
 
     // MARK: - Grading
@@ -513,18 +459,8 @@ struct PracticeView: View {
             missesOnCurrentStroke = 0
             hintIndex = nil
             feedback = nil
-
-            let milestone = streak.recordCorrect()
-            if let milestone {
-                streakBurst = milestone
-                SoundEffects.shared.play(.streakMilestone)
-            } else {
-                SoundEffects.shared.play(.strokeCorrect)
-            }
-
             if expectedIndex >= totalStrokes {
-                // If a streak fanfare just fired, it owns this moment — skip the chime.
-                completeCharacter(mistakesCount: mistakes, withChime: milestone == nil)
+                completeCharacter(mistakesCount: mistakes)
             }
 
         case .tooShort:
@@ -534,18 +470,14 @@ struct PracticeView: View {
         case .wrongDirection:
             mistakes += 1
             missesOnCurrentStroke += 1
-            streak.recordMiss()
             rejectLastStroke()
-            SoundEffects.shared.play(.strokeRejected)
             feedback = "Wrong direction — start that stroke from the other end."
             if missesOnCurrentStroke >= hintThreshold { hintIndex = expectedIndex }
 
         case .wrongStroke:
             mistakes += 1
             missesOnCurrentStroke += 1
-            streak.recordMiss()
             rejectLastStroke()
-            SoundEffects.shared.play(.strokeRejected)
             if let other = matchesAnotherStroke(userBox, data: data) {
                 feedback = "Out of order — that looks like stroke \(other + 1). Write stroke \(expectedIndex + 1) first."
             } else {
@@ -568,31 +500,17 @@ struct PracticeView: View {
         return nil
     }
 
-    /// Remove the most recent (rejected) stroke from the canvas, leaving a
-    /// snapshot of its ink to fade out (~0.35 s) so the rejection reads as
-    /// "the paper didn't take it" rather than a glitch. Deferred to the next
-    /// runloop tick to avoid mutating the drawing from inside its own change
-    /// callback.
+    /// Remove the most recent (rejected) stroke from the canvas. Deferred to the
+    /// next runloop tick to avoid mutating the drawing from inside its own
+    /// change callback.
     private func rejectLastStroke() {
+        // TODO(animation): fade the rejected ink out (~0.3s) instead of popping it,
+        // so a wrong stroke reads as "the paper rejected it" rather than a glitch.
         DispatchQueue.main.async {
-            guard let rejected = canvasView.drawing.strokes.last else { return }
+            guard !canvasView.drawing.strokes.isEmpty else { return }
             var drawing = canvasView.drawing
             drawing.strokes.removeLast()
             canvasView.drawing = drawing
-
-            // Under Reduce Motion the stroke simply disappears, as before.
-            guard !reduceMotion else { return }
-            let rect = CGRect(x: 0, y: 0, width: padSide, height: padSide)
-            let scale = max(canvasView.traitCollection.displayScale, 2)
-            var snapshot: UIImage?
-            // Render under a pinned-light trait to match the canvas, which is
-            // pinned .light so PencilKit never remaps stroke colors itself.
-            UITraitCollection(userInterfaceStyle: .light).performAsCurrent {
-                snapshot = PKDrawing(strokes: [rejected]).image(from: rect, scale: scale)
-            }
-            if let snapshot {
-                rejectedInks.append(RejectedInk(image: snapshot))
-            }
         }
     }
 
@@ -625,102 +543,36 @@ struct PracticeView: View {
         feedback = nil
         isDone = false
         isSkipped = false
-        rejectedInks = []
     }
 
-    private func completeCharacter(mistakesCount: Int, withChime: Bool = true) {
-        // The reward moment: the veil fades in and the seal stamps itself into
-        // the corner (SealStampView) a beat later, with a soft two-note chime.
-        withAnimation(.easeOut(duration: 0.3)) {
-            isDone = true
-        }
-        if withChime {
-            SoundEffects.shared.play(.characterComplete)
-        }
+    private func completeCharacter(mistakesCount: Int) {
+        // TODO(animation): the reward moment. Settle the finished glyph (small
+        // scale-down spring), then stamp SealView into the corner — spring from
+        // ~2.5x scale / 0 opacity with a slight random rotation, hanko-style.
+        // Consider a soft completion sound; most iPads have no haptic engine.
+        isDone = true
         results.append(SessionResultItem(glyph: currentItem.glyph, mistakes: mistakesCount, skipped: false))
     }
 
     private func skipCharacter() {
         demoTask?.cancel()
-        withAnimation(.easeOut(duration: 0.25)) {
-            isDone = true
-            isSkipped = true
-        }
+        isDone = true
+        isSkipped = true
         results.append(SessionResultItem(glyph: currentItem.glyph, mistakes: 0, skipped: true))
     }
 
     private func restartCurrent() {
-        withAnimation(.easeInOut(duration: 0.25)) {
-            setupCharacter()
-        }
+        setupCharacter()
     }
 
     private func nextCharacter() {
+        // TODO(animation): transition between characters — outgoing glyph slides/
+        // fades out, incoming fades in (.transition keyed on the glyph).
         if currentIndex + 1 >= deck.chars.count {
             onFinish(results)
         } else {
-            // Animates the prompt crossfade, the progress-dot spring, the veil
-            // fading out, and the pad's ink returning to ghost for the new glyph.
-            withAnimation(.easeInOut(duration: 0.35)) {
-                currentIndex += 1   // triggers setupCharacter() via onChange
-            }
+            currentIndex += 1   // triggers setupCharacter() via onChange
         }
-    }
-}
-
-// MARK: - Completion seal stamp
-
-/// The hanko moment on the done veil: the seal springs down onto the paper
-/// from above (large → resting size) with a slight, randomized tilt, like a
-/// real seal never landing perfectly straight twice.
-private struct SealStampView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var stamped = false
-    @State private var tilt = Double.random(in: -8 ... -2)
-
-    var body: some View {
-        SealView(size: 46)
-            .rotationEffect(.degrees(stamped ? tilt : 0))
-            .scaleEffect(stamped || reduceMotion ? 1 : 2.4)
-            .opacity(stamped ? 1 : 0)
-            .onAppear {
-                let stamp: Animation = reduceMotion
-                    ? .easeOut(duration: 0.2)
-                    : .spring(response: 0.3, dampingFraction: 0.55)
-                withAnimation(stamp.delay(0.15)) {
-                    stamped = true
-                }
-            }
-            .accessibilityHidden(true)
-    }
-}
-
-// MARK: - Rejected-ink fade
-
-/// A snapshot of a stroke the grader rejected, held in place over the canvas
-/// while it fades away.
-private struct RejectedInk: Identifiable {
-    let id = UUID()
-    let image: UIImage
-}
-
-private struct FadingInkView: View {
-    let image: UIImage
-    let onFinished: () -> Void
-
-    @State private var visible = true
-
-    var body: some View {
-        Image(uiImage: image)
-            .resizable()
-            .opacity(visible ? 1 : 0)
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
-            .task {
-                withAnimation(.easeOut(duration: 0.35)) { visible = false }
-                try? await Task.sleep(nanoseconds: 450_000_000)
-                onFinished()
-            }
     }
 }
 
