@@ -34,6 +34,7 @@
 //
 
 import Foundation
+import os
 
 // MARK: - JSON model
 
@@ -47,6 +48,8 @@ private struct IDSEntry: Codable {
 // MARK: - Decomposer
 
 enum IDSDecomposer {
+
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Inkwell", category: "IDSDecomposer")
 
     // MARK: Public API
 
@@ -132,15 +135,15 @@ enum IDSDecomposer {
     private static let fallbackMap: [String: IDSEntry] = {
         guard let url  = Bundle.main.url(forResource: "IDS_fallback", withExtension: "json"),
               let data = try? Data(contentsOf: url) else {
-            print("IDSDecomposer: IDS_fallback.json not found in bundle")
+            logger.error("IDS_fallback.json not found in bundle")
             return [:]
         }
         do {
             let map = try JSONDecoder().decode([String: IDSEntry].self, from: data)
-            print("IDSDecomposer: loaded \(map.count) IDS entries")
+            logger.info("loaded \(map.count) IDS entries")
             return map
         } catch {
-            print("IDSDecomposer: failed to decode IDS_fallback.json — \(error)")
+            logger.error("failed to decode IDS_fallback.json — \(error)")
             return [:]
         }
     }()
