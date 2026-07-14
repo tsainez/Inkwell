@@ -18,6 +18,7 @@ def build_database():
     """)
 
     added_glyphs = set()
+    rows_to_insert = []
 
     # 1. Load from animCJK graphicsJa.txt (Japanese Kanji priority)
     ja_path = "scripts/animCJK/graphicsJa.txt"
@@ -33,10 +34,7 @@ def build_database():
                     strokes = data.get("strokes", [])
                     medians = data.get("medians", [])
                     if glyph and strokes and medians and glyph not in added_glyphs:
-                        cursor.execute(
-                            "INSERT INTO character_strokes (glyph, strokes_json, medians_json) VALUES (?, ?, ?)",
-                            (glyph, json.dumps(strokes), json.dumps(medians))
-                        )
+                        rows_to_insert.append((glyph, json.dumps(strokes), json.dumps(medians)))
                         added_glyphs.add(glyph)
                 except Exception as e:
                     pass
@@ -56,10 +54,7 @@ def build_database():
                         strokes = data.get("strokes", [])
                         medians = data.get("medians", [])
                         if strokes and medians:
-                            cursor.execute(
-                                "INSERT INTO character_strokes (glyph, strokes_json, medians_json) VALUES (?, ?, ?)",
-                                (glyph, json.dumps(strokes), json.dumps(medians))
-                            )
+                            rows_to_insert.append((glyph, json.dumps(strokes), json.dumps(medians)))
                             added_glyphs.add(glyph)
                 except Exception as e:
                     pass
@@ -79,13 +74,16 @@ def build_database():
                         strokes = data.get("strokes", [])
                         medians = data.get("medians", [])
                         if glyph and strokes and medians and glyph not in added_glyphs:
-                            cursor.execute(
-                                "INSERT INTO character_strokes (glyph, strokes_json, medians_json) VALUES (?, ?, ?)",
-                                (glyph, json.dumps(strokes), json.dumps(medians))
-                            )
+                            rows_to_insert.append((glyph, json.dumps(strokes), json.dumps(medians)))
                             added_glyphs.add(glyph)
                     except Exception as e:
                         pass
+
+    if rows_to_insert:
+        cursor.executemany(
+            "INSERT INTO character_strokes (glyph, strokes_json, medians_json) VALUES (?, ?, ?)",
+            rows_to_insert
+        )
 
     conn.commit()
     cursor.execute("SELECT COUNT(*) FROM character_strokes")
