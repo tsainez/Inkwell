@@ -14,16 +14,14 @@
 import CoreGraphics
 import Foundation
 import SwiftUI
-
-import CoreGraphics
-import Foundation
-import SwiftUI
 import SQLite3
+import OSLog
 
 /// On-demand store of reference stroke data, querying the offline SQLite database on demand.
 final class StrokeReference {
     static let shared = StrokeReference()
 
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Inkwell", category: "StrokeReference")
     private var cache: [String: CharacterStrokeData] = [:]
     private var db: OpaquePointer?
 
@@ -62,13 +60,13 @@ final class StrokeReference {
     private func openDatabase() {
         if let url = Bundle.main.url(forResource: "StrokeData", withExtension: "sqlite") {
             if sqlite3_open_v2(url.path, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK {
-                print("StrokeReference: Successfully opened StrokeData.sqlite")
+                logger.info("Successfully opened StrokeData.sqlite")
                 return
             } else {
-                print("StrokeReference: Failed to open StrokeData.sqlite at \(url.path)")
+                logger.error("Failed to open StrokeData.sqlite at \(url.path)")
             }
         } else {
-            print("StrokeReference: StrokeData.sqlite not found in Bundle.main")
+            logger.error("StrokeData.sqlite not found in Bundle.main")
         }
         loadFallbackJSON()
     }
@@ -108,7 +106,7 @@ final class StrokeReference {
             let items = try JSONDecoder().decode([CharacterStrokeData].self, from: raw)
             cache = Dictionary(uniqueKeysWithValues: items.map { ($0.glyph, $0) })
         } catch {
-            print("Failed to decode fallback StrokeData.json: \(error)")
+            logger.error("Failed to decode fallback StrokeData.json: \(error.localizedDescription)")
         }
     }
 }
