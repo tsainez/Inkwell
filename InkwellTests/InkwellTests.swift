@@ -83,6 +83,21 @@ struct InkwellTests {
         #expect(StrokeGrader.judge(user: tap, median: renStroke1) == .tooShort)
     }
 
+    @Test func emptyUserStrokeIsTooShort() async throws {
+        #expect(StrokeGrader.judge(user: [], median: renStroke1) == .tooShort)
+    }
+
+    @Test func singlePointUserStrokeIsTooShort() async throws {
+        let singlePoint = [CGPoint(x: 480, y: 160)]
+        #expect(StrokeGrader.judge(user: singlePoint, median: renStroke1) == .tooShort)
+    }
+
+    @Test func degenerateMedianIsWrongStroke() async throws {
+        let user = jitter(renStroke1, amount: 10)
+        let degenerateMedian = [CGPoint(x: 480, y: 160)]
+        #expect(StrokeGrader.judge(user: user, median: degenerateMedian) == .wrongStroke)
+    }
+
     // MARK: - Direction on a symmetric (horizontal) stroke
 
     @Test func backwardsHorizontalStrokeIsWrongDirection() async throws {
