@@ -62,26 +62,32 @@ struct PracticeView: View {
         VStack(spacing: 0) {
             header
 
-            // Prompt sits centered on the screen regardless of device width.
-            promptBlock
-                .padding(.top, 20)
-                .padding(.horizontal, 40)
+            ZStack {
+                VStack(spacing: 0) {
+                    // Prompt sits centered on the screen regardless of device width.
+                    promptBlock
+                        .padding(.top, 20)
+                        .padding(.horizontal, 40)
 
-            // Writing pad stays left-of-center; the open zone beside it is
-            // where the writing hand rests.
-            HStack(spacing: 40) {
-                writingColumn
-                handRestZone
+                    // Writing pad stays left-of-center; the open zone beside it is
+                    // where the writing hand rests.
+                    HStack(spacing: 40) {
+                        writingColumn
+                        handRestZone
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.top, 12)
+
+                    Spacer(minLength: 8)
+
+                    // Stats / done card is centered on the screen as well.
+                    statsCard
+                        .frame(width: 460)
+                        .padding(.bottom, 20)
+                }
+                .id(currentItem.glyph)
+                .transition(.asymmetric(insertion: .opacity, removal: .opacity.combined(with: .slide)))
             }
-            .padding(.horizontal, 40)
-            .padding(.top, 12)
-
-            Spacer(minLength: 8)
-
-            // Stats / done card is centered on the screen as well.
-            statsCard
-                .frame(width: 460)
-                .padding(.bottom, 20)
         }
         .background(InkTheme.paper.ignoresSafeArea())
         .onAppear { setupCharacter() }
@@ -566,12 +572,12 @@ struct PracticeView: View {
     }
 
     private func nextCharacter() {
-        // TODO(animation): transition between characters — outgoing glyph slides/
-        // fades out, incoming fades in (.transition keyed on the glyph).
         if currentIndex + 1 >= deck.chars.count {
             onFinish(results)
         } else {
-            currentIndex += 1   // triggers setupCharacter() via onChange
+            withAnimation(.easeInOut) {
+                currentIndex += 1   // triggers setupCharacter() via onChange
+            }
         }
     }
 }
