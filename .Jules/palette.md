@@ -1,0 +1,3 @@
+## 2024-07-15 - Missing ARIA/Accessibility Labels in Reusable View Builders
+**Learning:** Reusable view builder functions for icon-only buttons (like `veilButton`) often miss accessibility labels because they lack textual context and are abstracted away from their specific usage.
+**Action:** Always require an accessibility label parameter when extracting icon-only buttons into reusable components to ensure screen reader support.
