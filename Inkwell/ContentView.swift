@@ -32,8 +32,14 @@ struct ContentView: View {
     private func saveResults(_ results: [SessionResultItem], for deck: CharacterDeck) {
         let flawless = results.filter { !$0.skipped && $0.mistakes == 0 }.count
         deckProgress[deck.id] = max(deckProgress[deck.id] ?? 0, flawless)
+
+        // Optimize O(N) array search to O(1) dictionary lookup
+        let progressMap = savedProgress.reduce(into: [String: CharacterProgress]()) { dict, progress in
+            dict[progress.glyph] = progress
+        }
+
         for item in results where !item.skipped {
-            if let existing = savedProgress.first(where: { $0.glyph == item.glyph }) {
+            if let existing = progressMap[item.glyph] {
                 existing.recordAttempt(mistakes: item.mistakes)
             } else {
                 let newProg = CharacterProgress(glyph: item.glyph)
