@@ -680,5 +680,10 @@ struct DesignTokenTests {
         #expect(deck("jade").accent == InkTheme.jade)
         #expect(deck("ink").accent == InkTheme.accent)
         #expect(deck("anything-else").accent == InkTheme.accent)
+
+        #expect(deck("sun").accentColor == "#9a6a2f")
+        #expect(deck("jade").accentColor == "#1f6f6b")
+        #expect(deck("ink").accentColor == "#c8492f")
+        #expect(deck("anything-else").accentColor == "#c8492f")
     }
 }
