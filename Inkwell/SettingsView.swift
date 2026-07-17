@@ -109,7 +109,7 @@ struct SettingsView: View {
             icon: "circle.lefthalf.filled",
             label: "APPEARANCE",
             title: "Theme",
-            description: "Match the device, or pin Inkwell to Light or Dark. The writing pad, decks, and ink all follow your choice."
+            description: "Match the device, or pin Inkstone to Light or Dark. The writing pad, decks, and ink all follow your choice."
         ) {
             SegmentedPicker(
                 options: AppAppearance.allCases.map { ($0.title, $0.rawValue) },
@@ -244,7 +244,7 @@ struct SettingsView: View {
         SettingsCard(
             icon: "info.circle.fill",
             label: "ABOUT",
-            title: "Inkwell",
+            title: "Inkstone",
             description: "Practice hand-writing Chinese and Japanese characters in the correct stroke order."
         ) {
             VStack(alignment: .leading, spacing: 14) {
@@ -259,7 +259,7 @@ struct SettingsView: View {
                         .font(.inkSans(size: 11, weight: .bold))
                         .foregroundColor(InkTheme.ink3)
                         .tracking(1.0)
-                    Text("Everything stays on this iPad. Inkwell has no accounts, collects no data, and never connects to a server.")
+                    Text("Everything stays on this iPad. Inkstone has no accounts, collects no data, and never connects to a server.")
                         .font(.inkSans(size: 13))
                         .foregroundColor(InkTheme.ink2)
                         .lineSpacing(3)
@@ -290,6 +290,29 @@ struct SettingsView: View {
                     Link(destination: URL(string: "https://tsainez.github.io/Inkwell/licenses/")!) {
                         HStack(spacing: 5) {
                             Text("View full licenses & attribution")
+                                .font(.inkSans(size: 13, weight: .semibold))
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 10, weight: .bold))
+                        }
+                        .foregroundColor(InkTheme.accent)
+                    }
+                }
+
+                Divider().background(InkTheme.line)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("SUPPORT")
+                        .font(.inkSans(size: 11, weight: .bold))
+                        .foregroundColor(InkTheme.ink3)
+                        .tracking(1.0)
+                    Text("Questions, problems, or ideas? Get in touch — every message is read.")
+                        .font(.inkSans(size: 13))
+                        .foregroundColor(InkTheme.ink2)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Link(destination: URL(string: "https://tsainez.github.io/Inkwell/support/")!) {
+                        HStack(spacing: 5) {
+                            Text("Get help & contact")
                                 .font(.inkSans(size: 13, weight: .semibold))
                             Image(systemName: "arrow.up.right")
                                 .font(.system(size: 10, weight: .bold))

@@ -47,7 +47,7 @@ struct LibraryView: View {
                     HStack(spacing: 12) {
                         SealView(size: 38)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Inkwell")
+                            Text("Inkstone")
                                 .font(.inkSerif(size: 26, weight: .bold))
                                 .foregroundColor(InkTheme.ink)
                             Text("stroke order, by hand")
