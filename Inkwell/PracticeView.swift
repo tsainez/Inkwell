@@ -240,10 +240,10 @@ struct PracticeView: View {
                 // offers both replay and advancing to the next character.
                 HStack(spacing: 16) {
                     if isEndless {
-                        veilButton(icon: "arrow.counterclockwise", prominent: true, action: restartCurrent)
+                        veilButton(icon: "arrow.counterclockwise", prominent: true, label: "Restart current character", action: restartCurrent)
                     } else {
-                        veilButton(icon: "arrow.counterclockwise", prominent: false, action: restartCurrent)
-                        veilButton(icon: "arrow.right", prominent: true, action: nextCharacter)
+                        veilButton(icon: "arrow.counterclockwise", prominent: false, label: "Restart current character", action: restartCurrent)
+                        veilButton(icon: "arrow.right", prominent: true, label: "Next character", action: nextCharacter)
                     }
                 }
 
@@ -269,7 +269,7 @@ struct PracticeView: View {
         }
     }
 
-    private func veilButton(icon: String, prominent: Bool, action: @escaping () -> Void) -> some View {
+    private func veilButton(icon: String, prominent: Bool, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Circle()
                 .fill(prominent ? InkTheme.accent : InkTheme.line2)
@@ -282,6 +282,7 @@ struct PracticeView: View {
                 )
         }
         .buttonStyle(InkPressButtonStyle(pressedScale: 0.92))
+        .accessibilityLabel(label)
     }
 
     private var controlsRow: some View {
