@@ -14,10 +14,6 @@
 import CoreGraphics
 import Foundation
 import SwiftUI
-
-import CoreGraphics
-import Foundation
-import SwiftUI
 import SQLite3
 import OSLog
 
@@ -26,7 +22,6 @@ final class StrokeReference {
     static let shared = StrokeReference()
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Inkwell", category: "StrokeReference")
-
     private var cache: [String: CharacterStrokeData] = [:]
     private var db: OpaquePointer?
 

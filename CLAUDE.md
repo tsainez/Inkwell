@@ -62,6 +62,16 @@ State transitions are passed as callbacks from child views back up to `ContentVi
 | `CharacterProgress.swift` | SwiftData `@Model` for per-character mastery tracking |
 | `DesignTokens.swift` | Single source of truth for all colors and typography |
 | `ContentView.swift` | Root navigator / `ActiveScreen` state machine |
+| `SoundEffects.swift` | Synthesized feedback sounds (no audio assets); `.ambient` session, toggled in Settings |
+| `StreakTracker.swift` | Pure consecutive-correct streak counting + milestone detection |
+| `InkBurstView.swift` | Streak-milestone celebration overlay (seal stamp + ink-droplet burst) |
+| `InkButtonStyle.swift` | Shared press-feedback `ButtonStyle` (gentle scale + opacity dip) |
+
+### Animation & Sound Conventions
+
+- Every animation must respect **Reduce Motion** (`@Environment(\.accessibilityReduceMotion)`): drop offsets/scales/particles and fall back to plain opacity fades.
+- All audio goes through `SoundEffects.shared.play(_:)` — sounds are synthesized on a shared pentatonic scale, use the `.ambient` session (silent-switch aware, mixes with the user's music), and are gated by the "Sound effects" toggle in Settings (`AppSettings.Key.soundEffects`).
+- Celebration overlays (`InkBurstView`, the done-veil seal stamp) must never block input: keep `allowsHitTesting(false)` and let them dismiss themselves.
 
 ### Stroke Grading Algorithm (`StrokeGrader`)
 
