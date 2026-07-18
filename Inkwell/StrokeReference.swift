@@ -63,7 +63,7 @@ final class StrokeReference {
                 logger.info("Successfully opened StrokeData.sqlite")
                 return
             } else {
-                logger.error("Failed to open StrokeData.sqlite at \(url.path)")
+                logger.error("Failed to open StrokeData.sqlite at \(url.path, privacy: .private)")
             }
         } else {
             logger.error("StrokeData.sqlite not found in Bundle.main")
