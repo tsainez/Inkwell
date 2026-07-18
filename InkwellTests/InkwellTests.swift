@@ -221,6 +221,16 @@ struct StrokeGraderUtilityTests {
         #expect(StrokeGrader.meanDistance([], []) == .greatestFiniteMagnitude)
     }
 
+    // MARK: pathLength edge cases
+
+    @Test func pathLengthEmptyArrayIsZero() {
+        #expect(StrokeGrader.pathLength([]) == 0)
+    }
+
+    @Test func pathLengthSinglePointIsZero() {
+        #expect(StrokeGrader.pathLength([CGPoint(x: 10, y: 10)]) == 0)
+    }
+
     // MARK: resample edge cases
 
     @Test func resampleSingleInputPointFillsRequestedCount() {
