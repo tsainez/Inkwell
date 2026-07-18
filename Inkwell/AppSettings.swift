@@ -17,6 +17,7 @@ enum AppSettings {
         static let gridStyle = "settings.gridStyle"
         static let hintThreshold = "settings.hintThreshold"
         static let appearance = "settings.appearance"
+        static let soundEffects = "settings.soundEffects"
     }
 
     // MARK: - Defaults
@@ -25,6 +26,7 @@ enum AppSettings {
     static let defaultGridStyle = GuideGridStyle.rice
     static let defaultHintThreshold = 3
     static let defaultAppearance = AppAppearance.system
+    static let defaultSoundEffects = true
 
     /// Allowed range for "wrong strokes before the next stroke is highlighted".
     static let hintThresholdRange = 1...6

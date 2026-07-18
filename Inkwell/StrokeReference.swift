@@ -14,16 +14,14 @@
 import CoreGraphics
 import Foundation
 import SwiftUI
-
-import CoreGraphics
-import Foundation
-import SwiftUI
 import SQLite3
+import OSLog
 
 /// On-demand store of reference stroke data, querying the offline SQLite database on demand.
 final class StrokeReference {
     static let shared = StrokeReference()
 
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Inkwell", category: "StrokeReference")
     private var cache: [String: CharacterStrokeData] = [:]
     private var db: OpaquePointer?
 
@@ -62,13 +60,13 @@ final class StrokeReference {
     private func openDatabase() {
         if let url = Bundle.main.url(forResource: "StrokeData", withExtension: "sqlite") {
             if sqlite3_open_v2(url.path, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK {
-                print("StrokeReference: Successfully opened StrokeData.sqlite")
+                logger.info("Successfully opened StrokeData.sqlite")
                 return
             } else {
-                print("StrokeReference: Failed to open StrokeData.sqlite at \(url.path)")
+                logger.error("Failed to open StrokeData.sqlite at \(url.path, privacy: .private)")
             }
         } else {
-            print("StrokeReference: StrokeData.sqlite not found in Bundle.main")
+            logger.error("StrokeData.sqlite not found in Bundle.main")
         }
         loadFallbackJSON()
     }
@@ -108,7 +106,7 @@ final class StrokeReference {
             let items = try JSONDecoder().decode([CharacterStrokeData].self, from: raw)
             cache = Dictionary(uniqueKeysWithValues: items.map { ($0.glyph, $0) })
         } catch {
-            print("Failed to decode fallback StrokeData.json: \(error)")
+            logger.error("Failed to decode fallback StrokeData.json: \(error.localizedDescription)")
         }
     }
 }
@@ -171,6 +169,40 @@ enum SVGPath {
             return CGFloat(Double(tokens[index]) ?? 0)
         }
 
+        func handleMove() {
+            let p = transform(number(), number())
+            path.move(to: p)
+            // Extra coordinate pairs after an M are implicit line-tos.
+            while peekIsNumber() {
+                let q = transform(number(), number())
+                path.addLine(to: q)
+            }
+        }
+
+        func handleLine() {
+            while peekIsNumber() {
+                let q = transform(number(), number())
+                path.addLine(to: q)
+            }
+        }
+
+        func handleQuadCurve() {
+            while peekIsNumber() {
+                let c = transform(number(), number())
+                let end = transform(number(), number())
+                path.addQuadCurve(to: end, control: c)
+            }
+        }
+
+        func handleCurve() {
+            while peekIsNumber() {
+                let c1 = transform(number(), number())
+                let c2 = transform(number(), number())
+                let end = transform(number(), number())
+                path.addCurve(to: end, control1: c1, control2: c2)
+            }
+        }
+
         while index < tokens.count {
             let token = tokens[index]
             guard let command = token.first, token.count == 1, command.isLetter else {
@@ -180,36 +212,12 @@ enum SVGPath {
             index += 1
 
             switch command {
-            case "M":
-                let p = transform(number(), number())
-                path.move(to: p)
-                // Extra coordinate pairs after an M are implicit line-tos.
-                while peekIsNumber() {
-                    let q = transform(number(), number())
-                    path.addLine(to: q)
-                }
-            case "L":
-                while peekIsNumber() {
-                    let q = transform(number(), number())
-                    path.addLine(to: q)
-                }
-            case "Q":
-                while peekIsNumber() {
-                    let c = transform(number(), number())
-                    let end = transform(number(), number())
-                    path.addQuadCurve(to: end, control: c)
-                }
-            case "C":
-                while peekIsNumber() {
-                    let c1 = transform(number(), number())
-                    let c2 = transform(number(), number())
-                    let end = transform(number(), number())
-                    path.addCurve(to: end, control1: c1, control2: c2)
-                }
-            case "Z", "z":
-                path.closeSubpath()
-            default:
-                break
+            case "M": handleMove()
+            case "L": handleLine()
+            case "Q": handleQuadCurve()
+            case "C": handleCurve()
+            case "Z", "z": path.closeSubpath()
+            default: break
             }
         }
         return path

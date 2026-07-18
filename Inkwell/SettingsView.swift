@@ -19,6 +19,7 @@ struct SettingsView: View {
     @AppStorage(AppSettings.Key.gridStyle) private var gridStyleRaw: String = AppSettings.defaultGridStyle.rawValue
     @AppStorage(AppSettings.Key.hintThreshold) private var hintThreshold: Int = AppSettings.defaultHintThreshold
     @AppStorage(AppSettings.Key.appearance) private var appearanceRaw: String = AppSettings.defaultAppearance.rawValue
+    @AppStorage(AppSettings.Key.soundEffects) private var soundEffects: Bool = AppSettings.defaultSoundEffects
 
     @State private var showResetConfirm = false
 
@@ -40,6 +41,7 @@ struct SettingsView: View {
                     gradingSection
                     writingPadSection
                     hintsSection
+                    soundSection
                     dataSection
                     aboutSection
                 }
@@ -176,6 +178,26 @@ struct SettingsView: View {
                     }
                 }
                 .fixedSize()
+            }
+        }
+    }
+
+    // MARK: - Sound
+
+    private var soundSection: some View {
+        SettingsCard(
+            icon: "speaker.wave.2.fill",
+            label: "SOUND",
+            title: "Sound effects",
+            description: "Soft ink taps and chimes as you write. They respect the silent switch and never interrupt your own music."
+        ) {
+            SegmentedPicker(
+                options: [("On", true), ("Off", false)],
+                selection: $soundEffects
+            )
+            .onChange(of: soundEffects) { _, enabled in
+                // A little preview so turning it on answers "what does it sound like?"
+                if enabled { SoundEffects.shared.play(.characterComplete) }
             }
         }
     }
