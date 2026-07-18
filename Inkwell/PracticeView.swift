@@ -509,50 +509,54 @@ struct PracticeView: View {
 
         switch StrokeGrader.judge(user: userBox, median: expectedMedian, config: config) {
         case .correct:
-            expectedIndex += 1
-            missesOnCurrentStroke = 0
-            hintIndex = nil
-            feedback = nil
-
-            let milestone = streak.recordCorrect()
-            if let milestone {
-                streakBurst = milestone
-                SoundEffects.shared.play(.streakMilestone)
-            } else {
-                SoundEffects.shared.play(.strokeCorrect)
-            }
-
-            if expectedIndex >= totalStrokes {
-                // If a streak fanfare just fired, it owns this moment — skip the chime.
-                completeCharacter(mistakesCount: mistakes, withChime: milestone == nil)
-            }
+            handleCorrectStroke()
 
         case .tooShort:
             // An accidental dab — remove it but don't penalize.
             rejectLastStroke()
 
         case .wrongDirection:
-            mistakes += 1
-            missesOnCurrentStroke += 1
-            streak.recordMiss()
-            rejectLastStroke()
-            SoundEffects.shared.play(.strokeRejected)
-            feedback = "Wrong direction — start that stroke from the other end."
-            if missesOnCurrentStroke >= hintThreshold { hintIndex = expectedIndex }
+            handleMistake(feedbackMessage: "Wrong direction — start that stroke from the other end.")
 
         case .wrongStroke:
-            mistakes += 1
-            missesOnCurrentStroke += 1
-            streak.recordMiss()
-            rejectLastStroke()
-            SoundEffects.shared.play(.strokeRejected)
+            let feedbackMessage: String
             if let other = matchesAnotherStroke(userBox, data: data) {
-                feedback = "Out of order — that looks like stroke \(other + 1). Write stroke \(expectedIndex + 1) first."
+                feedbackMessage = "Out of order — that looks like stroke \(other + 1). Write stroke \(expectedIndex + 1) first."
             } else {
-                feedback = "Not quite — try stroke \(expectedIndex + 1) again."
+                feedbackMessage = "Not quite — try stroke \(expectedIndex + 1) again."
             }
-            if missesOnCurrentStroke >= hintThreshold { hintIndex = expectedIndex }
+            handleMistake(feedbackMessage: feedbackMessage)
         }
+    }
+
+    private func handleCorrectStroke() {
+        expectedIndex += 1
+        missesOnCurrentStroke = 0
+        hintIndex = nil
+        feedback = nil
+
+        let milestone = streak.recordCorrect()
+        if let milestone {
+            streakBurst = milestone
+            SoundEffects.shared.play(.streakMilestone)
+        } else {
+            SoundEffects.shared.play(.strokeCorrect)
+        }
+
+        if expectedIndex >= totalStrokes {
+            // If a streak fanfare just fired, it owns this moment — skip the chime.
+            completeCharacter(mistakesCount: mistakes, withChime: milestone == nil)
+        }
+    }
+
+    private func handleMistake(feedbackMessage: String) {
+        mistakes += 1
+        missesOnCurrentStroke += 1
+        streak.recordMiss()
+        rejectLastStroke()
+        SoundEffects.shared.play(.strokeRejected)
+        feedback = feedbackMessage
+        if missesOnCurrentStroke >= hintThreshold { hintIndex = expectedIndex }
     }
 
     /// Does the user's stroke actually match a different stroke of this glyph?
