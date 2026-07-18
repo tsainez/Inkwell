@@ -5,7 +5,7 @@ permalink: /licenses/
 
 # Licenses & Attribution
 
-Inkwell bundles character stroke data (outlines and median centerlines)
+Inkstone bundles character stroke data (outlines and median centerlines)
 derived from:
 
 - [Make Me a Hanzi](https://github.com/skishore/makemeahanzi)

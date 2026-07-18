@@ -1,8 +1,33 @@
-# Inkwell — App Store Release Checklist
+# Inkstone — App Store Release Checklist
 
 Status of everything standing between this repo and a 1.0 on the App Store.
 Items marked ✅ were fixed in the codebase; items marked 🔲 need you (mostly
 in App Store Connect — they can't be done from the repo).
+
+## App Review round 1 — rejected July 16, 2026 (v1.0 build 2)
+
+Two issues; the repo side of both is fixed, the App Store Connect side
+needs you.
+
+- ✅ **Guideline 5.2.5 (Apple trademark)** — the app is renamed **Inkstone**
+  in the repo: `CFBundleDisplayName` (home-screen name), the Library header,
+  Settings, the docs site, and the metadata draft. "Inkwell" is on Apple's
+  trademark list (their old handwriting-recognition feature), and App Review
+  enforces it even though the USPTO registration is dead — don't bother
+  appealing. Internal names (repo, scheme, targets, module, bundle ID) stay
+  `Inkwell`; they're invisible to users and App Review doesn't flag them.
+- ✅ **Guideline 1.5 (Support URL)** — the docs site now has a support page
+  (`docs/support.md` → `/support/`) with a contact email, GitHub Issues
+  link, and FAQ; the landing page also shows the contact info directly.
+- 🔲 In App Store Connect, change the app **Name** to
+  `Inkstone: Hanzi Handwriting` (App Information → Name).
+- 🔲 Set the **Support URL** to `https://tsainez.github.io/Inkwell/support/`.
+- 🔲 Confirm GitHub Pages is live (repo Settings → Pages → deploy from
+  `main` / `docs`) and that `/support/` loads **before** resubmitting —
+  the reviewer will click it.
+- 🔲 Archive a new build with the rename (build number must be > 2), upload,
+  and resubmit. Reply to the rejection in App Store Connect noting both
+  fixes.
 
 ## ✅ Fixed in the repo
 
@@ -47,10 +72,10 @@ in App Store Connect — they can't be done from the repo).
   forever after the first upload to App Store Connect. If you'd rather have
   the conventional reverse-DNS form (e.g. `com.tsainez.inkwell`), change it
   *now* in the target's Signing & Capabilities.
-- **App name availability.** "Inkwell" must be unique on the App Store and
-  short names are usually taken. Check when you create the app record; have
-  a fallback like "Inkwell — Hanzi & Kanji" ready. (The display name on the
-  home screen stays "Inkwell" either way via `CFBundleDisplayName`.)
+- **App name availability.** ~~"Inkwell" must be unique on the App Store~~
+  Superseded: "Inkwell" was rejected under Guideline 5.2.5 (Apple trademark).
+  The app is now **Inkstone** — `Inkstone: Hanzi Handwriting` in App Store
+  Connect, "Inkstone" on the home screen via `CFBundleDisplayName`.
 
 ## 🔲 App Store Connect (manual)
 
@@ -65,8 +90,10 @@ in App Store Connect — they can't be done from the repo).
    2048×2732). Take them in the iPad Pro simulator (⌘S saves to Desktop).
    Include at least: Library, Practice mid-character, Session complete.
    Take a matching dark-mode set if you want them in the listing.
-7. Description, keywords, **support URL** (the GitHub repo works), and
-   promotional text.
+7. Description, keywords, **support URL**
+   (`https://tsainez.github.io/Inkwell/support/` — must be a page with
+   contact info, per Guideline 1.5; a bare repo link gets rejected), and
+   promotional text. All drafted in `APP_STORE_METADATA.md`.
 8. Archive & upload from Xcode (Product → Archive → Distribute App), then
    submit for review. Expect the reviewer to use the app iPad-with-finger.
 

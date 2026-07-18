@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Inkwell** is an iPad-first SwiftUI app for practicing Chinese and Japanese character handwriting (Hanzi/Kanji) with real-time stroke order, direction, and form recognition. It targets iPadOS 17+ with Apple Pencil support via PencilKit.
 
+**Naming:** the user-facing product name is **Inkstone** ("Inkwell" was rejected by App Review under Guideline 5.2.5 — it's an Apple trademark). All user-visible strings, `CFBundleDisplayName`, the docs site, and App Store metadata say "Inkstone". The repo, Xcode project, scheme, targets, module (`@testable import Inkwell`), and bundle ID intentionally keep the internal name `Inkwell` — do not rename them, and never surface "Inkwell" in UI text.
+
 ## Build & Test Commands
 
 ```bash

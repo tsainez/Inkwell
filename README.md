@@ -1,6 +1,12 @@
-# Inkwell 🖌️
+# Inkstone 🖌️
 
-**Inkwell** is an iPad application built with SwiftUI designed to teach and practice hand-writing Chinese characters with authentic stroke order recognition and interactive feedback.
+**Inkstone** (this repository keeps its original name, `Inkwell`) is an iPad application built with SwiftUI designed to teach and practice hand-writing Chinese characters with authentic stroke order recognition and interactive feedback.
+
+> **Why two names?** App Review rejected the original name "Inkwell" under
+> Guideline 5.2.5 — it's on Apple's trademark list (the old Mac OS X
+> handwriting-recognition feature). The user-facing app is **Inkstone**; the
+> repo, Xcode project, targets, and bundle ID keep the internal name
+> `Inkwell` so URLs and project history stay stable.
 
 ## Features (Planned & In Progress)
 - ✍️ **Apple Pencil & Touch Canvas:** Ultra-responsive drawing canvas using PencilKit.
