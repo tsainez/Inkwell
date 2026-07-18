@@ -1,3 +1,6 @@
+## 2024-05-24 - Bulk SQLite Inserts in Python
+**Learning:** Accumulating data in Python memory (e.g. lists of tuples) and calling `cursor.executemany()` is significantly faster than executing N+1 individual `cursor.execute()` statements in a loop for SQLite, due to reduced I/O overhead.
+**Action:** Use `cursor.executemany` for bulk insert/update operations in Python scripts instead of looping N times over single execute statements.
 ## 2026-02-21 - [Caching Computed Properties in Swift]
 **Learning:** [Computed properties in Swift, such as array-to-dictionary transformations, re-execute entirely on every access. This can turn O(1) lookups into O(N) operations inside loops, leading to O(N * M) overall time complexity.]
 **Action:** [Store computed maps/dictionaries in a local variable outside loops when they only depend on constant state, effectively resolving performance bottlenecks without complex architectural changes.]
