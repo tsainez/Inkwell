@@ -79,7 +79,8 @@ struct CharacterTableView: View {
     }
     
     private var filteredCharacters: [DisplayCharacter] {
-        allCharacters.filter { item in
+        let currentMap = progressMap
+        return allCharacters.filter { item in
             // Search filter
             let matchesSearch: Bool
             if searchText.isEmpty {
@@ -104,12 +105,12 @@ struct CharacterTableView: View {
             case .numbers:
                 return item.level.contains("Foundations") || item.meaning.contains("one") || item.meaning.contains("two") || item.meaning.contains("three") || item.meaning.contains("four") || item.meaning.contains("five") || item.meaning.contains("six") || item.meaning.contains("seven") || item.meaning.contains("eight") || item.meaning.contains("nine") || item.meaning.contains("ten")
             case .mastered:
-                let prog = progressMap[item.glyph]
+                let prog = currentMap[item.glyph]
                 return prog?.isMastered(threshold: masteryTarget) ?? false
             }
         }.sorted { a, b in
-            let progA = progressMap[a.glyph]
-            let progB = progressMap[b.glyph]
+            let progA = currentMap[a.glyph]
+            let progB = currentMap[b.glyph]
             
             switch selectedSort {
             case .mostPracticed:
@@ -125,8 +126,9 @@ struct CharacterTableView: View {
     }
     
     private var totalMasteredCount: Int {
-        allCharacters.filter { item in
-            progressMap[item.glyph]?.isMastered(threshold: masteryTarget) ?? false
+        let currentMap = progressMap
+        return allCharacters.filter { item in
+            currentMap[item.glyph]?.isMastered(threshold: masteryTarget) ?? false
         }.count
     }
     

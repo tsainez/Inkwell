@@ -83,6 +83,21 @@ struct InkwellTests {
         #expect(StrokeGrader.judge(user: tap, median: renStroke1) == .tooShort)
     }
 
+    @Test func emptyUserStrokeIsTooShort() async throws {
+        #expect(StrokeGrader.judge(user: [], median: renStroke1) == .tooShort)
+    }
+
+    @Test func singlePointUserStrokeIsTooShort() async throws {
+        let singlePoint = [CGPoint(x: 480, y: 160)]
+        #expect(StrokeGrader.judge(user: singlePoint, median: renStroke1) == .tooShort)
+    }
+
+    @Test func degenerateMedianIsWrongStroke() async throws {
+        let user = jitter(renStroke1, amount: 10)
+        let degenerateMedian = [CGPoint(x: 480, y: 160)]
+        #expect(StrokeGrader.judge(user: user, median: degenerateMedian) == .wrongStroke)
+    }
+
     // MARK: - Direction on a symmetric (horizontal) stroke
 
     @Test func backwardsHorizontalStrokeIsWrongDirection() async throws {
@@ -204,6 +219,16 @@ struct StrokeGraderUtilityTests {
 
     @Test func meanDistanceEmptyArraysReturnsGreatestMagnitude() {
         #expect(StrokeGrader.meanDistance([], []) == .greatestFiniteMagnitude)
+    }
+
+    // MARK: pathLength edge cases
+
+    @Test func pathLengthEmptyArrayIsZero() {
+        #expect(StrokeGrader.pathLength([]) == 0)
+    }
+
+    @Test func pathLengthSinglePointIsZero() {
+        #expect(StrokeGrader.pathLength([CGPoint(x: 10, y: 10)]) == 0)
     }
 
     // MARK: resample edge cases
@@ -403,6 +428,61 @@ struct SVGPathTests {
         let normal = SVGPath.path(from: "M 0 0 L 100 0", transform: identity)
         let scaled = SVGPath.path(from: "M 0 0 L 100 0", transform: scale)
         #expect(abs(scaled.boundingRect.maxX - normal.boundingRect.maxX * 2) < 0.5)
+    }
+
+}
+
+// MARK: - StrokeReferencePathTests
+
+/// Testing StrokeReference.path SVG parsing and Path generation
+/// Note: The actual path method is implemented in SVGPath.path (Inkwell/StrokeReference.swift:159)
+struct StrokeReferencePathTests {
+
+    private func identity(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: x, y: y) }
+
+    @Test func chainedLinesAllRendered() {
+        let path = SVGPath.path(from: "M 0 0 L 10 10 20 20", transform: identity)
+        #expect(!path.isEmpty)
+        #expect(path.boundingRect.maxX >= 20 - 0.5)
+    }
+
+    @Test func chainedCubicCurvesAllRendered() {
+        let path = SVGPath.path(from: "M 0 0 C 0 50 100 50 100 0 100 -50 200 -50 200 0", transform: identity)
+        #expect(!path.isEmpty)
+        #expect(path.boundingRect.maxX >= 200 - 0.5)
+    }
+
+    @Test func unrecognizedCommandsAreIgnored() {
+        let path = SVGPath.path(from: "X 10 20 M 0 0 L 100 100 Y 50 M 0 0", transform: identity)
+        let bounds = path.boundingRect
+        #expect(bounds.maxX >= 100 - 0.5)
+    }
+
+    @Test func strayNumbersAreSkipped() {
+        let path = SVGPath.path(from: "10 20 30 M 0 0 L 100 100", transform: identity)
+        let bounds = path.boundingRect
+        #expect(bounds.maxX >= 100 - 0.5)
+    }
+
+    @Test func missingNumbersDefaultToZero() {
+        let path = SVGPath.path(from: "M 10 L 20", transform: identity)
+        let bounds = path.boundingRect
+        #expect(abs(bounds.minX - 10) < 0.5)
+        #expect(abs(bounds.maxX - 20) < 0.5)
+        #expect(abs(bounds.minY - 0) < 0.5)
+    }
+
+    @Test func consecutiveDashesTokenizedCorrectly() {
+        // "-10-20" -> "-10", "-20"
+        let path = SVGPath.path(from: "M -10-20 L -30-40", transform: identity)
+        let bounds = path.boundingRect
+        #expect(abs(bounds.minX - (-30)) < 0.5)
+        #expect(abs(bounds.minY - (-40)) < 0.5)
+    }
+
+    @Test func lowercaseZClosesSubpath() {
+        let path = SVGPath.path(from: "M 0 0 L 100 0 L 100 100 z", transform: identity)
+        #expect(!path.isEmpty)
     }
 }
 
@@ -680,5 +760,10 @@ struct DesignTokenTests {
         #expect(deck("jade").accent == InkTheme.jade)
         #expect(deck("ink").accent == InkTheme.accent)
         #expect(deck("anything-else").accent == InkTheme.accent)
+
+        #expect(deck("sun").accentColor == "#9a6a2f")
+        #expect(deck("jade").accentColor == "#1f6f6b")
+        #expect(deck("ink").accentColor == "#c8492f")
+        #expect(deck("anything-else").accentColor == "#c8492f")
     }
 }

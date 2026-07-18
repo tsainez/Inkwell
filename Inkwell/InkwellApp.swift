@@ -15,7 +15,8 @@ struct InkwellApp: App {
             Item.self,
             CharacterProgress.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let isInMemory = ProcessInfo.processInfo.arguments.contains("-inMemoryStore")
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: isInMemory)
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
