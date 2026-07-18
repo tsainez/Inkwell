@@ -83,6 +83,21 @@ struct InkwellTests {
         #expect(StrokeGrader.judge(user: tap, median: renStroke1) == .tooShort)
     }
 
+    @Test func emptyUserStrokeIsTooShort() async throws {
+        #expect(StrokeGrader.judge(user: [], median: renStroke1) == .tooShort)
+    }
+
+    @Test func singlePointUserStrokeIsTooShort() async throws {
+        let singlePoint = [CGPoint(x: 480, y: 160)]
+        #expect(StrokeGrader.judge(user: singlePoint, median: renStroke1) == .tooShort)
+    }
+
+    @Test func degenerateMedianIsWrongStroke() async throws {
+        let user = jitter(renStroke1, amount: 10)
+        let degenerateMedian = [CGPoint(x: 480, y: 160)]
+        #expect(StrokeGrader.judge(user: user, median: degenerateMedian) == .wrongStroke)
+    }
+
     // MARK: - Direction on a symmetric (horizontal) stroke
 
     @Test func backwardsHorizontalStrokeIsWrongDirection() async throws {
@@ -204,6 +219,16 @@ struct StrokeGraderUtilityTests {
 
     @Test func meanDistanceEmptyArraysReturnsGreatestMagnitude() {
         #expect(StrokeGrader.meanDistance([], []) == .greatestFiniteMagnitude)
+    }
+
+    // MARK: pathLength edge cases
+
+    @Test func pathLengthEmptyArrayIsZero() {
+        #expect(StrokeGrader.pathLength([]) == 0)
+    }
+
+    @Test func pathLengthSinglePointIsZero() {
+        #expect(StrokeGrader.pathLength([CGPoint(x: 10, y: 10)]) == 0)
     }
 
     // MARK: resample edge cases
@@ -680,5 +705,10 @@ struct DesignTokenTests {
         #expect(deck("jade").accent == InkTheme.jade)
         #expect(deck("ink").accent == InkTheme.accent)
         #expect(deck("anything-else").accent == InkTheme.accent)
+
+        #expect(deck("sun").accentColor == "#9a6a2f")
+        #expect(deck("jade").accentColor == "#1f6f6b")
+        #expect(deck("ink").accentColor == "#c8492f")
+        #expect(deck("anything-else").accentColor == "#c8492f")
     }
 }
