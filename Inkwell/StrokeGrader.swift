@@ -66,7 +66,11 @@ enum StrokeGrader {
     /// Grade `user` (an ordered list of points in glyph-box space) against the
     /// reference stroke `median` (also in glyph-box space).
     static func judge(user: [CGPoint], median: [CGPoint], config: Config = Config()) -> StrokeJudgment {
-        switch fit(user: user, median: median, config: config) {
+        return judge(fitResult: fit(user: user, median: median, config: config), config: config)
+    }
+
+    private static func judge(fitResult: FitResult, config: Config) -> StrokeJudgment {
+        switch fitResult {
         case .tooShort:
             return .tooShort
         case .degenerate:
@@ -99,8 +103,9 @@ enum StrokeGrader {
         var best: Int?
         var bestScore = CGFloat.greatestFiniteMagnitude
         for (i, median) in medians.enumerated() {
-            guard judge(user: user, median: median, config: config) == .correct else { continue }
-            if case .metrics(let f) = fit(user: user, median: median, config: config),
+            let fitResult = fit(user: user, median: median, config: config)
+            guard judge(fitResult: fitResult, config: config) == .correct else { continue }
+            if case .metrics(let f) = fitResult,
                f.forwardMean < bestScore {
                 bestScore = f.forwardMean
                 best = i
@@ -157,12 +162,15 @@ enum StrokeGrader {
     // MARK: - Geometry helpers (internal for testing)
 
     static func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
-        hypot(a.x - b.x, a.y - b.y)
+        let dx = a.x - b.x
+        let dy = a.y - b.y
+        return (dx * dx + dy * dy).squareRoot()
     }
 
     /// Remove consecutive duplicate / near-duplicate points.
     static func dedupe(_ pts: [CGPoint], epsilon: CGFloat = 0.0001) -> [CGPoint] {
         var out: [CGPoint] = []
+        out.reserveCapacity(pts.count)
         for p in pts {
             if let last = out.last, distance(last, p) <= epsilon { continue }
             out.append(p)
