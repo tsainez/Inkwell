@@ -7,3 +7,7 @@
 ## 2024-05-18 - Dictionary lookup for SwiftData queries
 **Learning:** Performing a linear search using `.first(where:)` on an array returned by a SwiftData `@Query` inside a loop leads to O(N*M) performance overhead.
 **Action:** Always pre-calculate a dictionary mapping of a unique property (like `glyph`) to the SwiftData model instance in O(N) time before iterating over results that require O(1) matching in O(M) loop time.
+
+## 2024-05-24 - [Performance] Cache Expensive Results & Fast Math
+**Learning:** Found O(N) operations (like curve resampling and deduplication) being redundantly executed multiple times inside loops because helper functions didn't reuse intermediate structs. Also noticed `hypot` introduces unnecessary overhead for standard iOS UI coordinates where overflow isn't a risk.
+**Action:** Always check loop bodies for function calls that re-evaluate the same state. Pass intermediate calculation results (like `FitResult` enums) to helper functions instead of discarding them. Replace `hypot` with standard square root multiplication for basic UI distance math.
