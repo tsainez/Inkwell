@@ -21,7 +21,8 @@ struct InkwellApp: App {
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            // SECURITY: Do not leak internal container paths or schema errors to crash reports
+            fatalError("Could not create ModelContainer. The application cannot continue.")
         }
     }()
 
