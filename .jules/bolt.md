@@ -11,3 +11,6 @@
 ## 2024-05-24 - [Performance] Cache Expensive Results & Fast Math
 **Learning:** Found O(N) operations (like curve resampling and deduplication) being redundantly executed multiple times inside loops because helper functions didn't reuse intermediate structs. Also noticed `hypot` introduces unnecessary overhead for standard iOS UI coordinates where overflow isn't a risk.
 **Action:** Always check loop bodies for function calls that re-evaluate the same state. Pass intermediate calculation results (like `FitResult` enums) to helper functions instead of discarding them. Replace `hypot` with standard square root multiplication for basic UI distance math.
+## 2024-05-24 - [Caching Computed Properties in SwiftUI]
+**Learning:** [Computed properties in Swift, such as array-to-dictionary transformations, re-execute entirely on every access. Inside a `LazyVStack` and `ForEach`, accessing a computed property (like `progressMap`) repeatedly for every row as it comes on-screen can result in that property being re-evaluated N times. This can turn O(1) lookups into O(N) operations inside loops, leading to O(N^2) rendering bottlenecks.]
+**Action:** [Cache computationally expensive computed properties into a local variable before using them inside a `ForEach` or `LazyVStack`. This prevents O(N) properties from being continuously re-evaluated.]

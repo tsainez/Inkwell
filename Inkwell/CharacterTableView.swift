@@ -334,7 +334,9 @@ struct CharacterTableView: View {
     
     // MARK: - Table List
     private var characterTable: some View {
-        LazyVStack(spacing: 12) {
+        // Cache progressMap to avoid O(N^2) recreation within the ForEach loop
+        let currentMap = progressMap
+        return LazyVStack(spacing: 12) {
             if filteredCharacters.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "doc.text.magnifyingglass")
@@ -343,6 +345,22 @@ struct CharacterTableView: View {
                     Text("No matching characters found")
                         .font(.inkSerif(size: 18, weight: .bold))
                         .foregroundColor(InkTheme.ink2)
+
+                    if !searchText.isEmpty || selectedFilter != .all {
+                        Button(action: {
+                            searchText = ""
+                            selectedFilter = .all
+                        }) {
+                            Text("Clear filters")
+                                .font(.inkSans(size: 14, weight: .bold))
+                                .foregroundColor(InkTheme.onInk)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(InkTheme.ink)
+                                .cornerRadius(8)
+                        }
+                        .padding(.top, 8)
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(60)
@@ -352,7 +370,7 @@ struct CharacterTableView: View {
                 ForEach(filteredCharacters) { item in
                     CharacterTableRowView(
                         item: item,
-                        progress: progressMap[item.glyph],
+                        progress: currentMap[item.glyph],
                         targetGoal: masteryTarget,
                         onPractice: {
                             if let deck = item.deck {
