@@ -8,3 +8,6 @@
 
 **Learning:** When displaying empty states (e.g., due to active searches or filters returning no results), it improves UX to provide a one-tap action (e.g., "Clear filters") allowing the user to reset their view easily without modifying multiple inputs.
 **Action:** When working on lists/tables with filtering and search, look for empty state views and verify if a reset action exists; if not, add it.
+## 2024-07-29 - Missing Screen Reader Feedback in Custom Pickers
+**Learning:** Custom segmented pickers built using horizontal rows of standard SwiftUI `Button` views do not automatically announce their selection state to VoiceOver users.
+**Action:** Always add `.accessibilityAddTraits(isSelected ? .isSelected : [])` to custom selection controls to provide proper screen reader feedback.
