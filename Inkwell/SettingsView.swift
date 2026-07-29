@@ -399,6 +399,7 @@ private struct SegmentedPicker<Value: Equatable>: View {
                         .background(selection == value ? InkTheme.ink : Color.clear)
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(selection == value ? .isSelected : [])
             }
         }
         .background(InkTheme.line2)
