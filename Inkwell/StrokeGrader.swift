@@ -100,18 +100,13 @@ enum StrokeGrader {
     static func indexOfBestMatch(user: [CGPoint],
                                  medians: [[CGPoint]],
                                  config: Config = Config()) -> Int? {
-        var best: Int?
-        var bestScore = CGFloat.greatestFiniteMagnitude
-        for (i, median) in medians.enumerated() {
+        medians.enumerated().compactMap { i, median -> (index: Int, score: CGFloat)? in
             let fitResult = fit(user: user, median: median, config: config)
-            guard judge(fitResult: fitResult, config: config) == .correct else { continue }
-            if case .metrics(let f) = fitResult,
-               f.forwardMean < bestScore {
-                bestScore = f.forwardMean
-                best = i
-            }
+            guard judge(fitResult: fitResult, config: config) == .correct,
+                  case .metrics(let f) = fitResult else { return nil }
+            return (index: i, score: f.forwardMean)
         }
-        return best
+        .min(by: { $0.score < $1.score })?.index
     }
 
     // MARK: - Fit
