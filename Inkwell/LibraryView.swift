@@ -40,7 +40,11 @@ struct LibraryView: View {
     }
     
     var body: some View {
-        ScrollView {
+        // ⚡ Bolt: Cache custom deck creation to avoid O(N) string processing
+        // and redundant object allocation across multiple property accesses during render.
+        let customDeck = buildCustomDeck()
+
+        return ScrollView {
             VStack(alignment: .leading, spacing: 32) {
                 // Header
                 HStack {
@@ -195,12 +199,12 @@ struct LibraryView: View {
                                     .cornerRadius(10)
                             }
                             .accessibilityLabel("Start custom practice")
-                            .disabled(buildCustomDeck() == nil)
-                            .opacity(buildCustomDeck() == nil ? 0.4 : 1.0)
+                            .disabled(customDeck == nil)
+                            .opacity(customDeck == nil ? 0.4 : 1.0)
                         }
                         
                         HStack(spacing: 8) {
-                            if let deck = buildCustomDeck() {
+                            if let deck = customDeck {
                                 Text("\(deck.chars.count) character\(deck.chars.count == 1 ? "" : "s")")
                                     .font(.inkSans(size: 12, weight: .medium))
                                     .foregroundColor(InkTheme.accent)
