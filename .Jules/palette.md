@@ -8,3 +8,6 @@
 
 **Learning:** When displaying empty states (e.g., due to active searches or filters returning no results), it improves UX to provide a one-tap action (e.g., "Clear filters") allowing the user to reset their view easily without modifying multiple inputs.
 **Action:** When working on lists/tables with filtering and search, look for empty state views and verify if a reset action exists; if not, add it.
+## 2026-08-12 - Segmented Picker Accessibility
+**Learning:** Custom segmented pickers built with horizontal stacks of buttons do not automatically announce their selected state to VoiceOver in SwiftUI.
+**Action:** Add `.accessibilityAddTraits(selection == value ? .isSelected : [])` to each option button within `SegmentedPicker`.
