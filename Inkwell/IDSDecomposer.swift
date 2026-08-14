@@ -144,7 +144,7 @@ enum IDSDecomposer {
             logger.info("loaded \(map.count) IDS entries")
             return map
         } catch {
-            logger.error("failed to decode IDS_fallback.json — \(error.localizedDescription)")
+            logger.error("failed to decode IDS_fallback.json — \(error.localizedDescription, privacy: .private)")
             return [:]
         }
     }()
