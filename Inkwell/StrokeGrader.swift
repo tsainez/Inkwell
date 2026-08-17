@@ -151,11 +151,17 @@ enum StrokeGrader {
         let rm = resample(m, count: n)
         let reversed = Array(ru.reversed())
 
+        guard let ruFirst = ru.first, let ruLast = ru.last,
+              let rmFirst = rm.first, let rmLast = rm.last,
+              let revFirst = reversed.first, let revLast = reversed.last else {
+            return .degenerate
+        }
+
         return .metrics(Fit(
             forwardMean: meanDistance(ru, rm),
-            forwardEnds: max(distance(ru.first!, rm.first!), distance(ru.last!, rm.last!)),
+            forwardEnds: max(distance(ruFirst, rmFirst), distance(ruLast, rmLast)),
             reverseMean: meanDistance(reversed, rm),
-            reverseEnds: max(distance(reversed.first!, rm.first!), distance(reversed.last!, rm.last!))
+            reverseEnds: max(distance(revFirst, rmFirst), distance(revLast, rmLast))
         ))
     }
 
