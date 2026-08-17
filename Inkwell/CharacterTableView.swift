@@ -78,9 +78,8 @@ struct CharacterTableView: View {
         return items
     }
     
-    private var filteredCharacters: [DisplayCharacter] {
-        let currentMap = progressMap
-        return allCharacters.filter { item in
+    private func filteredCharacters(currentCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> [DisplayCharacter] {
+        return currentCharacters.filter { item in
             // Search filter
             let matchesSearch: Bool
             if searchText.isEmpty {
@@ -125,9 +124,8 @@ struct CharacterTableView: View {
         }
     }
     
-    private var totalMasteredCount: Int {
-        let currentMap = progressMap
-        return allCharacters.filter { item in
+    private func totalMasteredCount(currentCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> Int {
+        return currentCharacters.filter { item in
             currentMap[item.glyph]?.isMastered(threshold: masteryTarget) ?? false
         }.count
     }
@@ -137,14 +135,17 @@ struct CharacterTableView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        let currentMap = progressMap
+        let currentCharacters = allCharacters
+
+        return VStack(spacing: 0) {
             headerBar
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    statsAndGoalBanner
+                    statsAndGoalBanner(currentCharacters: currentCharacters, currentMap: currentMap)
                     filterAndSearchControls
-                    characterTable
+                    characterTable(currentCharacters: currentCharacters, currentMap: currentMap)
                 }
                 .padding(40)
             }
@@ -195,7 +196,7 @@ struct CharacterTableView: View {
     }
     
     // MARK: - Stats Banner & Target Goal Selector
-    private var statsAndGoalBanner: some View {
+    private func statsAndGoalBanner(currentCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> some View {
         HStack(alignment: .center, spacing: 32) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("OVERALL MASTERY")
@@ -204,10 +205,10 @@ struct CharacterTableView: View {
                     .tracking(1.2)
                 
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("\(totalMasteredCount)")
+                    Text("\(totalMasteredCount(currentCharacters: currentCharacters, currentMap: currentMap))")
                         .font(.inkSerif(size: 44, weight: .bold))
                         .foregroundColor(InkTheme.ink)
-                    Text("/ \(allCharacters.count) characters mastered")
+                    Text("/ \(currentCharacters.count) characters mastered")
                         .font(.inkSans(size: 16, weight: .medium))
                         .foregroundColor(InkTheme.ink2)
                 }
@@ -333,11 +334,11 @@ struct CharacterTableView: View {
     }
     
     // MARK: - Table List
-    private var characterTable: some View {
-        // Cache progressMap to avoid O(N^2) recreation within the ForEach loop
-        let currentMap = progressMap
+    private func characterTable(currentCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> some View {
+        // Cache progressMap and filter result to avoid O(N) recreation within the body and ForEach loop
+        let filtered = filteredCharacters(currentCharacters: currentCharacters, currentMap: currentMap)
         return LazyVStack(spacing: 12) {
-            if filteredCharacters.isEmpty {
+            if filtered.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "doc.text.magnifyingglass")
                         .font(.system(size: 40))
@@ -367,7 +368,7 @@ struct CharacterTableView: View {
                 .background(InkTheme.card)
                 .cornerRadius(16)
             } else {
-                ForEach(filteredCharacters) { item in
+                ForEach(filtered) { item in
                     CharacterTableRowView(
                         item: item,
                         progress: currentMap[item.glyph],

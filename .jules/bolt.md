@@ -14,3 +14,6 @@
 ## 2024-05-24 - [Caching Computed Properties in SwiftUI]
 **Learning:** [Computed properties in Swift, such as array-to-dictionary transformations, re-execute entirely on every access. Inside a `LazyVStack` and `ForEach`, accessing a computed property (like `progressMap`) repeatedly for every row as it comes on-screen can result in that property being re-evaluated N times. This can turn O(1) lookups into O(N) operations inside loops, leading to O(N^2) rendering bottlenecks.]
 **Action:** [Cache computationally expensive computed properties into a local variable before using them inside a `ForEach` or `LazyVStack`. This prevents O(N) properties from being continuously re-evaluated.]
+## 2024-05-24 - [Comment Performance Optimizations]
+**Learning:** [Code review flagged that I neglected to add a comment explaining the purpose of caching the computed properties inside the main `body` property, violating the explicit instruction under "✅ Always do: Add comments explaining the optimization."]
+**Action:** [Always include an inline comment explaining *why* an optimization was made (e.g., "Cache progressMap and filter result to avoid O(N) recreation within the body and ForEach loop") alongside the refactored code.]
