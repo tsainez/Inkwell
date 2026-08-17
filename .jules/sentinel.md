@@ -6,3 +6,7 @@
 **Vulnerability:** The \`InkwellApp\` initialization passed a raw Swift Error directly into \`fatalError()\`. When this hits the system crash reporter, the interpolated error object often includes underlying NSError domains that leak exact file paths inside the app container, or details about the application's internal Core Data schema.
 **Learning:** Functions that immediately terminate the process and write to OS crash logs (\`fatalError\`, \`preconditionFailure\`, etc.) are public surfaces. Interpolating unredacted \`Error\` variables into these functions is an information exposure risk.
 **Prevention:** Avoid interpolating \`Error\` or arbitrary state directly into crash-terminating messages. Use static, opaque messages that indicate failure state without revealing environmental structure.
+## 2024-05-18 - Avoid logging full paths with os_log
+**Vulnerability:** The application was logging the full URL path of a SQLite database on failure (`logger.error("Failed to open StrokeData.sqlite at \(url.path, privacy: .private)")`).
+**Learning:** Even with `privacy: .private`, logging full paths provides information exposure vectors about sandbox layout.
+**Prevention:** Avoid logging full sensitive file paths entirely. Use generic error messages or just the file name instead.
