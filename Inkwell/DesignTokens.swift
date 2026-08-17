@@ -92,3 +92,23 @@ extension Font {
         .system(size: size, weight: weight, design: .default)
     }
 }
+
+struct InkCardModifier: ViewModifier {
+    var cornerRadius: CGFloat
+    var strokeWidth: CGFloat
+    var background: Color
+    var strokeColor: Color
+
+    func body(content: Content) -> some View {
+        content
+            .background(background)
+            .cornerRadius(cornerRadius)
+            .overlay(RoundedRectangle(cornerRadius: cornerRadius).stroke(strokeColor, lineWidth: strokeWidth))
+    }
+}
+
+extension View {
+    func inkCard(cornerRadius: CGFloat = 16, strokeWidth: CGFloat = 1, background: Color = InkTheme.card, strokeColor: Color = InkTheme.line) -> some View {
+        self.modifier(InkCardModifier(cornerRadius: cornerRadius, strokeWidth: strokeWidth, background: background, strokeColor: strokeColor))
+    }
+}

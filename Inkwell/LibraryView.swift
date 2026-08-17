@@ -70,9 +70,7 @@ struct LibraryView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 8)
-                            .background(InkTheme.card)
-                            .cornerRadius(20)
-                            .overlay(RoundedRectangle(cornerRadius: 20).stroke(InkTheme.line, lineWidth: 1.5))
+                            .inkCard(cornerRadius: 20, strokeWidth: 1.5)
                         }
                         .accessibilityLabel("Open Mastery Table")
                         
@@ -229,10 +227,8 @@ struct LibraryView: View {
                     }
                     .padding(22)
                     .frame(width: 380)
-                    .background(InkTheme.card)
-                    .cornerRadius(18)
+                    .inkCard(cornerRadius: 18)
                     .shadow(color: InkTheme.shadow, radius: 12, x: 0, y: 4)
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(InkTheme.line, lineWidth: 1))
                 }
                 .padding(.bottom, 16)
                 
@@ -387,9 +383,7 @@ struct CharacterOfTheDayWidget: View {
                 }
             }
             .padding(32)
-            .background(InkTheme.card)
-            .cornerRadius(24)
-            .overlay(RoundedRectangle(cornerRadius: 24).stroke(InkTheme.line, lineWidth: 1))
+            .inkCard(cornerRadius: 24)
             .shadow(color: InkTheme.shadow, radius: 12, x: 0, y: 4)
             .clipped()
         )

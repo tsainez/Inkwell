@@ -165,9 +165,7 @@ struct CharacterTableView: View {
                 .foregroundColor(InkTheme.ink)
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
-                .background(InkTheme.card)
-                .cornerRadius(10)
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
+                .inkCard(cornerRadius: 10)
             }
             .accessibilityLabel("Back to Decks")
             
@@ -261,9 +259,7 @@ struct CharacterTableView: View {
             }
         }
         .padding(24)
-        .background(InkTheme.card)
-        .cornerRadius(16)
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(InkTheme.line, lineWidth: 1))
+        .inkCard(cornerRadius: 16)
     }
     
     // MARK: - Search & Filters
@@ -286,9 +282,7 @@ struct CharacterTableView: View {
                 }
                 .padding(.horizontal, 14)
                 .frame(height: 44)
-                .background(InkTheme.card)
-                .cornerRadius(10)
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
+                .inkCard(cornerRadius: 10)
                 
                 Spacer()
                 
@@ -306,9 +300,7 @@ struct CharacterTableView: View {
                     .tint(InkTheme.ink)
                     .padding(.horizontal, 8)
                     .frame(height: 44)
-                    .background(InkTheme.card)
-                    .cornerRadius(10)
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
+                    .inkCard(cornerRadius: 10)
                 }
             }
             
@@ -540,8 +532,6 @@ struct CharacterTableRowView: View {
             }
         }
         .padding(18)
-        .background(InkTheme.card)
-        .cornerRadius(14)
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(InkTheme.line, lineWidth: 1))
+        .inkCard(cornerRadius: 14)
     }
 }
