@@ -40,7 +40,7 @@ struct CharacterTableView: View {
     }
     
     // Combine all standard characters from seed decks + any standalone items
-    private var allCharacters: [DisplayCharacter] {
+    private func getAllCharacters() -> [DisplayCharacter] {
         var items: [DisplayCharacter] = []
         var seen = Set<String>()
         
@@ -78,8 +78,7 @@ struct CharacterTableView: View {
         return items
     }
     
-    private var filteredCharacters: [DisplayCharacter] {
-        let currentMap = progressMap
+    private func getFilteredCharacters(allCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> [DisplayCharacter] {
         return allCharacters.filter { item in
             // Search filter
             let matchesSearch: Bool
@@ -125,8 +124,7 @@ struct CharacterTableView: View {
         }
     }
     
-    private var totalMasteredCount: Int {
-        let currentMap = progressMap
+    private func getTotalMasteredCount(allCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> Int {
         return allCharacters.filter { item in
             currentMap[item.glyph]?.isMastered(threshold: masteryTarget) ?? false
         }.count
@@ -137,14 +135,21 @@ struct CharacterTableView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        // Cached computationally expensive properties locally at the top of the body
+        // to prevent O(N) array transformations and dictionary mappings from being
+        // continuously re-evaluated by child views during every SwiftUI render pass.
+        let currentMap = progressMap
+        let currentAllCharacters = getAllCharacters()
+        let currentFilteredCharacters = getFilteredCharacters(allCharacters: currentAllCharacters, currentMap: currentMap)
+
+        return VStack(spacing: 0) {
             headerBar
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    statsAndGoalBanner
+                    getStatsAndGoalBanner(allCharacters: currentAllCharacters, currentMap: currentMap)
                     filterAndSearchControls
-                    characterTable
+                    getCharacterTable(filteredCharacters: currentFilteredCharacters, currentMap: currentMap)
                 }
                 .padding(40)
             }
@@ -195,7 +200,7 @@ struct CharacterTableView: View {
     }
     
     // MARK: - Stats Banner & Target Goal Selector
-    private var statsAndGoalBanner: some View {
+    private func getStatsAndGoalBanner(allCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> some View {
         HStack(alignment: .center, spacing: 32) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("OVERALL MASTERY")
@@ -204,7 +209,7 @@ struct CharacterTableView: View {
                     .tracking(1.2)
                 
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("\(totalMasteredCount)")
+                    Text("\(getTotalMasteredCount(allCharacters: allCharacters, currentMap: currentMap))")
                         .font(.inkSerif(size: 44, weight: .bold))
                         .foregroundColor(InkTheme.ink)
                     Text("/ \(allCharacters.count) characters mastered")
@@ -333,9 +338,7 @@ struct CharacterTableView: View {
     }
     
     // MARK: - Table List
-    private var characterTable: some View {
-        // Cache progressMap to avoid O(N^2) recreation within the ForEach loop
-        let currentMap = progressMap
+    private func getCharacterTable(filteredCharacters: [DisplayCharacter], currentMap: [String: CharacterProgress]) -> some View {
         return LazyVStack(spacing: 12) {
             if filteredCharacters.isEmpty {
                 VStack(spacing: 12) {
