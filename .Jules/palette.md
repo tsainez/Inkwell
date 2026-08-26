@@ -8,3 +8,6 @@
 
 **Learning:** When displaying empty states (e.g., due to active searches or filters returning no results), it improves UX to provide a one-tap action (e.g., "Clear filters") allowing the user to reset their view easily without modifying multiple inputs.
 **Action:** When working on lists/tables with filtering and search, look for empty state views and verify if a reset action exists; if not, add it.
+## 2024-07-28 - Improving Custom TextField Inputs for Practice Search
+**Learning:** Bare `TextField`s used for searching or custom inputs can feel clunky when they lack a quick way to clear the text or submit from the keyboard. Adding a clear button helps mobile users, and adding an `.onSubmit` modifier improves the experience for hardware keyboard users.
+**Action:** When working on text inputs that function as searches or direct practice triggers, wrap the `TextField` in an `HStack`, append a conditional clear button (`xmark.circle.fill`) with a clear accessibility label when the text is not empty, and use the `.onSubmit` modifier to trigger the primary action upon hitting Return.
