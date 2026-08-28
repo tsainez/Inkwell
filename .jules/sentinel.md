@@ -6,3 +6,7 @@
 **Vulnerability:** The \`InkwellApp\` initialization passed a raw Swift Error directly into \`fatalError()\`. When this hits the system crash reporter, the interpolated error object often includes underlying NSError domains that leak exact file paths inside the app container, or details about the application's internal Core Data schema.
 **Learning:** Functions that immediately terminate the process and write to OS crash logs (\`fatalError\`, \`preconditionFailure\`, etc.) are public surfaces. Interpolating unredacted \`Error\` variables into these functions is an information exposure risk.
 **Prevention:** Avoid interpolating \`Error\` or arbitrary state directly into crash-terminating messages. Use static, opaque messages that indicate failure state without revealing environmental structure.
+## 2024-07-24 - Secure Error Logging
+**Vulnerability:** Logging `error.localizedDescription` without explicit privacy modifiers in `Logger`.
+**Learning:** Explicitly converting error objects to strings (e.g., `String(describing: error)`) and marking them with `privacy: .private` ensures safe structural logging and prevents accidental information exposure of error details.
+**Prevention:** Always use `String(describing: error)` and `privacy: .private` when logging error objects with `os.Logger`.
