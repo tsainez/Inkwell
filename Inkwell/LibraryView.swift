@@ -178,13 +178,24 @@ struct LibraryView: View {
                             .lineSpacing(2)
                         
                         HStack(spacing: 8) {
-                            TextField("Type or paste 漢字…", text: $customInput)
-                                .font(.inkSerif(size: 18))
-                                .padding(.horizontal, 14)
-                                .frame(height: 46)
-                                .background(InkTheme.paper)
-                                .cornerRadius(10)
-                                .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
+                            HStack {
+                                TextField("Type or paste 漢字…", text: $customInput)
+                                    .font(.inkSerif(size: 18))
+                                    .onSubmit(startCustomPractice)
+
+                                if !customInput.isEmpty {
+                                    Button(action: { customInput = "" }) {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(InkTheme.ink3)
+                                    }
+                                    .accessibilityLabel("Clear input")
+                                }
+                            }
+                            .padding(.horizontal, 14)
+                            .frame(height: 46)
+                            .background(InkTheme.paper)
+                            .cornerRadius(10)
+                            .overlay(RoundedRectangle(cornerRadius: 10).stroke(InkTheme.line, lineWidth: 1))
 
                             Button(action: startCustomPractice) {
                                 Image(systemName: "arrow.right")
