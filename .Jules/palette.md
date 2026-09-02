@@ -8,3 +8,7 @@
 
 **Learning:** When displaying empty states (e.g., due to active searches or filters returning no results), it improves UX to provide a one-tap action (e.g., "Clear filters") allowing the user to reset their view easily without modifying multiple inputs.
 **Action:** When working on lists/tables with filtering and search, look for empty state views and verify if a reset action exists; if not, add it.
+## 2024-07-29 - TextField usability with clear buttons and onSubmit
+
+**Learning:** TextFields for search or custom input are hard to clear on mobile devices when there is a lot of text, and often require tapping a separate button to submit instead of just using the keyboard's return key.
+**Action:** Wrap TextFields in an HStack with a conditional clear button when not empty, and use the `.onSubmit` modifier to trigger the submission action from the keyboard.
