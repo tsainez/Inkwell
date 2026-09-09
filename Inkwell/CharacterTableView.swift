@@ -326,6 +326,7 @@ struct CharacterTableView: View {
                                 .cornerRadius(20)
                                 .overlay(RoundedRectangle(cornerRadius: 20).stroke(selectedFilter == option ? Color.clear : InkTheme.line, lineWidth: 1))
                         }
+                        .accessibilityAddTraits(selectedFilter == option ? .isSelected : [])
                     }
                 }
             }

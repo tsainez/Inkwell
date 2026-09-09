@@ -8,3 +8,6 @@
 
 **Learning:** When displaying empty states (e.g., due to active searches or filters returning no results), it improves UX to provide a one-tap action (e.g., "Clear filters") allowing the user to reset their view easily without modifying multiple inputs.
 **Action:** When working on lists/tables with filtering and search, look for empty state views and verify if a reset action exists; if not, add it.
+## 2024-11-20 - Adding isSelected trait to custom segmented controls
+**Learning:** Custom segmented controls or horizontal selection lists built using basic `Button` views in SwiftUI do not automatically announce their active selection state to screen readers, leaving VoiceOver users unsure of which option is currently active.
+**Action:** Always add `.accessibilityAddTraits(isSelected ? .isSelected : [])` to custom toggle/selection buttons built outside of native Pickers.
