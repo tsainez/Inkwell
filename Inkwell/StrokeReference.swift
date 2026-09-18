@@ -106,7 +106,7 @@ final class StrokeReference {
             let items = try JSONDecoder().decode([CharacterStrokeData].self, from: raw)
             cache = Dictionary(uniqueKeysWithValues: items.map { ($0.glyph, $0) })
         } catch {
-            logger.error("Failed to decode fallback StrokeData.json: \(error.localizedDescription)")
+            logger.error("Failed to decode fallback StrokeData.json: \(String(describing: error), privacy: .private)")
         }
     }
 }
