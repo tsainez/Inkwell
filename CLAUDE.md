@@ -17,17 +17,17 @@ xcodebuild -project Inkwell.xcodeproj -scheme Inkwell \
 
 # Run all tests
 xcodebuild test -project Inkwell.xcodeproj -scheme Inkwell \
-  -destination 'platform=iOS Simulator,name=iPad (10th generation)' \
+  -destination 'platform=iOS Simulator,name=iPad (A16)' \
   -parallel-testing-enabled NO -enableCodeCoverage YES
 
 # Run one Swift Testing suite (suites are structs, e.g. StrokeGraderUtilityTests)
 xcodebuild test -project Inkwell.xcodeproj -scheme Inkwell \
-  -destination 'platform=iOS Simulator,name=iPad (10th generation)' \
+  -destination 'platform=iOS Simulator,name=iPad (A16)' \
   -only-testing:InkwellTests/StrokeGraderUtilityTests
 
 # Run a single test function inside a suite
 xcodebuild test -project Inkwell.xcodeproj -scheme Inkwell \
-  -destination 'platform=iOS Simulator,name=iPad (10th generation)' \
+  -destination 'platform=iOS Simulator,name=iPad (A16)' \
   -only-testing:InkwellTests/StrokeGraderUtilityTests/pathLengthEmptyArrayIsZero
 ```
 
