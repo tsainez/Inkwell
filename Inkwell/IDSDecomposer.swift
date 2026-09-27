@@ -54,6 +54,12 @@ enum IDSDecomposer {
 
     // MARK: Public API
 
+    /// Preloads the lazy IDS fallback map. Call this on a background thread early in launch
+    /// so that the first main-thread request doesn't block on JSON decoding.
+    static func preload() {
+        _ = fallbackMap
+    }
+
     /// Attempt to synthesize stroke data for `glyph` by decomposing it into
     /// spatial components and assembling their (transformed) medians.
     ///
