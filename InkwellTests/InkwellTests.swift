@@ -489,6 +489,42 @@ struct StrokeReferencePathTests {
 // MARK: - StrokeReference Robustness
 
 struct StrokeReferenceRobustnessTests {
+    @Test func fallbackJSONMissingFileIsHandled() throws {
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("EmptyMockBundle.bundle")
+        try? FileManager.default.removeItem(at: tempDir)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        guard let mockBundle = Bundle(url: tempDir) else {
+            Issue.record("Failed to create mock bundle")
+            return
+        }
+
+        let reference = StrokeReference(bundle: mockBundle)
+        #expect(reference.data(for: "人") == nil)
+    }
+
+    @Test func fallbackJSONDecodeFailureIsLogged() throws {
+        // Create a temporary "Bundle" directory to mimic an actual NSBundle structure
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("MockBundle.bundle")
+        try? FileManager.default.removeItem(at: tempDir)
+        try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        // Write malformed JSON to the location where StrokeReference expects StrokeData.json
+        let jsonURL = tempDir.appendingPathComponent("StrokeData.json")
+        try "{ malformed: json }".write(to: jsonURL, atomically: true, encoding: .utf8)
+
+        guard let mockBundle = Bundle(url: tempDir) else {
+            Issue.record("Failed to create mock bundle")
+            return
+        }
+
+        // This should not crash, it should just log the error and cache remains empty
+        let reference = StrokeReference(bundle: mockBundle)
+        #expect(reference.data(for: "人") == nil)
+    }
+
 
     @Test func unknownGlyphReturnsNil() {
         #expect(StrokeReference.shared.data(for: "🐸") == nil)

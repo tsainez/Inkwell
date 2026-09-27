@@ -24,8 +24,10 @@ final class StrokeReference {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Inkwell", category: "StrokeReference")
     private var cache: [String: CharacterStrokeData] = [:]
     private var db: OpaquePointer?
+    private let bundle: Bundle
 
-    private init() {
+    internal init(bundle: Bundle = .main) {
+        self.bundle = bundle
         openDatabase()
     }
 
@@ -58,7 +60,7 @@ final class StrokeReference {
     }
 
     private func openDatabase() {
-        if let url = Bundle.main.url(forResource: "StrokeData", withExtension: "sqlite") {
+        if let url = bundle.url(forResource: "StrokeData", withExtension: "sqlite") {
             if sqlite3_open_v2(url.path, &db, SQLITE_OPEN_READONLY, nil) == SQLITE_OK {
                 logger.info("Successfully opened StrokeData.sqlite")
                 return
@@ -66,7 +68,7 @@ final class StrokeReference {
                 logger.error("Failed to open StrokeData.sqlite at \(url.path, privacy: .private)")
             }
         } else {
-            logger.error("StrokeData.sqlite not found in Bundle.main")
+            logger.error("StrokeData.sqlite not found in bundle")
         }
         loadFallbackJSON()
     }
@@ -100,7 +102,7 @@ final class StrokeReference {
     }
 
     private func loadFallbackJSON() {
-        guard let url = Bundle.main.url(forResource: "StrokeData", withExtension: "json") else { return }
+        guard let url = bundle.url(forResource: "StrokeData", withExtension: "json") else { return }
         do {
             let raw = try Data(contentsOf: url)
             let items = try JSONDecoder().decode([CharacterStrokeData].self, from: raw)
