@@ -24,6 +24,7 @@ final class StrokeReference {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Inkwell", category: "StrokeReference")
     private var cache: [String: CharacterStrokeData] = [:]
     private var db: OpaquePointer?
+    private var isFallbackJSONLoaded = false
 
     private init() {
         openDatabase()
@@ -36,6 +37,10 @@ final class StrokeReference {
     }
 
     func data(for glyph: String) -> CharacterStrokeData? {
+        if !isFallbackJSONLoaded {
+            loadFallbackJSONIfNeeded()
+        }
+
         if let cached = cache[glyph] {
             return cached
         }
@@ -68,7 +73,6 @@ final class StrokeReference {
         } else {
             logger.error("StrokeData.sqlite not found in Bundle.main")
         }
-        loadFallbackJSON()
     }
 
     private func fetchFromDatabase(glyph: String) -> CharacterStrokeData? {
@@ -99,14 +103,18 @@ final class StrokeReference {
         return nil
     }
 
-    private func loadFallbackJSON() {
+    private func loadFallbackJSONIfNeeded() {
+        guard !isFallbackJSONLoaded else { return }
+        isFallbackJSONLoaded = true
         guard let url = Bundle.main.url(forResource: "StrokeData", withExtension: "json") else { return }
         do {
             let raw = try Data(contentsOf: url)
             let items = try JSONDecoder().decode([CharacterStrokeData].self, from: raw)
-            cache = Dictionary(uniqueKeysWithValues: items.map { ($0.glyph, $0) })
+            for item in items {
+                cache[item.glyph] = item
+            }
         } catch {
-            logger.error("Failed to decode fallback StrokeData.json: \(error.localizedDescription)")
+            logger.error("Failed to decode fallback StrokeData.json: \(String(describing: error), privacy: .private)")
         }
     }
 }
