@@ -154,22 +154,44 @@ struct GlyphMetrics: Equatable {
 /// stroke data (commands M, L, Q, C, Z). Each coordinate is mapped through
 /// `transform` so the resulting `Path` is already in canvas space.
 enum SVGPath {
-    static func path(from d: String, transform: (CGFloat, CGFloat) -> CGPoint) -> Path {
-        var path = Path()
-        let tokens = tokenize(d)
+    private struct PathParser {
+        let tokens: [String]
         var index = 0
+        var path = Path()
+
+        mutating func parse(transform: (CGFloat, CGFloat) -> CGPoint) -> Path {
+            while index < tokens.count {
+                let token = tokens[index]
+                guard let command = token.first, token.count == 1, command.isLetter else {
+                    index += 1 // stray number — skip
+                    continue
+                }
+                index += 1
+
+                switch command {
+                case "M": handleMove(transform: transform)
+                case "L": handleLine(transform: transform)
+                case "Q": handleQuadCurve(transform: transform)
+                case "C": handleCurve(transform: transform)
+                case "Z", "z": path.closeSubpath()
+                default: break
+                }
+            }
+            return path
+        }
 
         func peekIsNumber() -> Bool {
             guard index < tokens.count else { return false }
             return Double(tokens[index]) != nil
         }
-        func number() -> CGFloat {
+
+        mutating func number() -> CGFloat {
             defer { index += 1 }
             guard index < tokens.count else { return 0 }
             return CGFloat(Double(tokens[index]) ?? 0)
         }
 
-        func handleMove() {
+        mutating func handleMove(transform: (CGFloat, CGFloat) -> CGPoint) {
             let p = transform(number(), number())
             path.move(to: p)
             // Extra coordinate pairs after an M are implicit line-tos.
@@ -179,14 +201,14 @@ enum SVGPath {
             }
         }
 
-        func handleLine() {
+        mutating func handleLine(transform: (CGFloat, CGFloat) -> CGPoint) {
             while peekIsNumber() {
                 let q = transform(number(), number())
                 path.addLine(to: q)
             }
         }
 
-        func handleQuadCurve() {
+        mutating func handleQuadCurve(transform: (CGFloat, CGFloat) -> CGPoint) {
             while peekIsNumber() {
                 let c = transform(number(), number())
                 let end = transform(number(), number())
@@ -194,7 +216,7 @@ enum SVGPath {
             }
         }
 
-        func handleCurve() {
+        mutating func handleCurve(transform: (CGFloat, CGFloat) -> CGPoint) {
             while peekIsNumber() {
                 let c1 = transform(number(), number())
                 let c2 = transform(number(), number())
@@ -202,25 +224,11 @@ enum SVGPath {
                 path.addCurve(to: end, control1: c1, control2: c2)
             }
         }
+    }
 
-        while index < tokens.count {
-            let token = tokens[index]
-            guard let command = token.first, token.count == 1, command.isLetter else {
-                index += 1 // stray number — skip
-                continue
-            }
-            index += 1
-
-            switch command {
-            case "M": handleMove()
-            case "L": handleLine()
-            case "Q": handleQuadCurve()
-            case "C": handleCurve()
-            case "Z", "z": path.closeSubpath()
-            default: break
-            }
-        }
-        return path
+    static func path(from d: String, transform: (CGFloat, CGFloat) -> CGPoint) -> Path {
+        var parser = PathParser(tokens: tokenize(d))
+        return parser.parse(transform: transform)
     }
 
     private static func tokenize(_ d: String) -> [String] {
