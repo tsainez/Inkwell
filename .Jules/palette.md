@@ -11,3 +11,6 @@
 ## 2026-08-12 - Segmented Picker Accessibility
 **Learning:** Custom segmented pickers built with horizontal stacks of buttons do not automatically announce their selected state to VoiceOver in SwiftUI.
 **Action:** Add `.accessibilityAddTraits(selection == value ? .isSelected : [])` to each option button within `SegmentedPicker`.
+## 2026-08-05 - Custom Segmented Picker VoiceOver State
+**Learning:** In SwiftUI, custom segmented pickers or selection controls built using horizontal rows of standard `Button` views do not automatically announce their selection state to VoiceOver.
+**Action:** Always add `.accessibilityAddTraits(isSelected ? .isSelected : [])` to these buttons to provide proper screen reader feedback.
