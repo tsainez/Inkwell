@@ -102,7 +102,7 @@ final class SoundEffects {
 
     /// One synthesized note: a sine fundamental plus a faster-decaying second
     /// harmonic under an exponential envelope — reads as a soft string pluck.
-    private struct Pluck {
+    struct Pluck {
         let frequency: Double   // Hz
         let start: Double       // seconds into the buffer
         let duration: Double    // seconds of audible tail
@@ -110,7 +110,7 @@ final class SoundEffects {
     }
 
     /// All pitches sit on a G pentatonic scale so any overlap stays consonant.
-    private static func recipe(for event: Event) -> [Pluck] {
+    static func recipe(for event: Event) -> [Pluck] {
         switch event {
         case .strokeCorrect:
             return [Pluck(frequency: 987.77, start: 0, duration: 0.09, amplitude: 0.10)] // B5 tick
@@ -131,7 +131,7 @@ final class SoundEffects {
         }
     }
 
-    private static func renderBuffer(for event: Event, format: AVAudioFormat) -> AVAudioPCMBuffer? {
+    static func renderBuffer(for event: Event, format: AVAudioFormat) -> AVAudioPCMBuffer? {
         let plucks = recipe(for: event)
         let totalSeconds = (plucks.map { $0.start + $0.duration }.max() ?? 0) + 0.05
         let frameCount = AVAudioFrameCount(totalSeconds * sampleRate)
