@@ -14,3 +14,6 @@
 ## 2024-05-24 - [Caching Computed Properties in SwiftUI]
 **Learning:** [Computed properties in Swift, such as array-to-dictionary transformations, re-execute entirely on every access. Inside a `LazyVStack` and `ForEach`, accessing a computed property (like `progressMap`) repeatedly for every row as it comes on-screen can result in that property being re-evaluated N times. This can turn O(1) lookups into O(N) operations inside loops, leading to O(N^2) rendering bottlenecks.]
 **Action:** [Cache computationally expensive computed properties into a local variable before using them inside a `ForEach` or `LazyVStack`. This prevents O(N) properties from being continuously re-evaluated.]
+## 2024-05-18 - Cache O(N) Geometry Mappings Outside Event Loops
+**Learning:** In interactive evaluation paths (like parsing user ink against reference vectors on every frame or user gesture), repeatedly re-mapping generic coordinate structures inside a nested `for` loop causes extreme performance cliffs in Swift.
+**Action:** Lift `array.map { point in coordinateSpace(point) }` transformations to the highest safe state boundary. Either calculate it once up-front or lazy-load it, and inject the mapped arrays back into the checking functions. Ensure the cache resets immediately when the context (e.g., character deck or selected glyph) changes.
