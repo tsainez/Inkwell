@@ -14,3 +14,6 @@
 ## 2024-05-24 - [Caching Computed Properties in SwiftUI]
 **Learning:** [Computed properties in Swift, such as array-to-dictionary transformations, re-execute entirely on every access. Inside a `LazyVStack` and `ForEach`, accessing a computed property (like `progressMap`) repeatedly for every row as it comes on-screen can result in that property being re-evaluated N times. This can turn O(1) lookups into O(N) operations inside loops, leading to O(N^2) rendering bottlenecks.]
 **Action:** [Cache computationally expensive computed properties into a local variable before using them inside a `ForEach` or `LazyVStack`. This prevents O(N) properties from being continuously re-evaluated.]
+## 2024-05-17 - Avoid Unnecessary Array Allocations for ReversedCollections
+**Learning:** Calling `Array(collection.reversed())` in Swift forces an unnecessary O(N) heap allocation, destroying the performance benefits of `ReversedCollection`.
+**Action:** When working with collections in hot loops, update function signatures to accept generic `Collection` protocols (e.g., `<C1: Collection, C2: Collection>`) instead of concrete Arrays. Iterate using `zip(a, b)` for safety and efficiency.

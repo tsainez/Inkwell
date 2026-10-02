@@ -149,7 +149,7 @@ enum StrokeGrader {
         let n = config.resampleCount
         let ru = resample(u, count: n)
         let rm = resample(m, count: n)
-        let reversed = Array(ru.reversed())
+        let reversed = ru.reversed()
 
         return .metrics(Fit(
             forwardMean: meanDistance(ru, rm),
@@ -234,11 +234,13 @@ enum StrokeGrader {
 
     /// Average distance between corresponding points of two equal-length,
     /// resampled polylines.
-    static func meanDistance(_ a: [CGPoint], _ b: [CGPoint]) -> CGFloat {
+    static func meanDistance<C1: Collection, C2: Collection>(_ a: C1, _ b: C2) -> CGFloat where C1.Element == CGPoint, C2.Element == CGPoint {
         let n = min(a.count, b.count)
         guard n > 0 else { return .greatestFiniteMagnitude }
         var total: CGFloat = 0
-        for i in 0..<n { total += distance(a[i], b[i]) }
+        for (pa, pb) in zip(a, b) {
+            total += distance(pa, pb)
+        }
         return total / CGFloat(n)
     }
 }
