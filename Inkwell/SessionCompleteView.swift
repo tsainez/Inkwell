@@ -44,90 +44,12 @@ struct SessionCompleteView: View {
                     .modifier(EntranceModifier(shown: appeared, delay: 0.14, reduceMotion: reduceMotion))
 
                 // Glyph Grid
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(Array(results.enumerated()), id: \.offset) { _, item in
-                            ZStack(alignment: .topTrailing) {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(item.skipped ? InkTheme.line2 : (item.mistakes == 0 ? InkTheme.accent.opacity(0.08) : InkTheme.card))
-                                    .frame(width: 64, height: 64)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(item.mistakes == 0 && !item.skipped ? InkTheme.accent : InkTheme.line, lineWidth: item.mistakes == 0 && !item.skipped ? 2 : 1)
-                                    )
-
-                                Text(item.glyph)
-                                    .font(.inkSerif(size: 30))
-                                    .foregroundColor(item.skipped ? InkTheme.ink3 : InkTheme.ink)
-                                    .frame(width: 64, height: 64)
-
-                                if item.mistakes == 0 && !item.skipped {
-                                    Circle()
-                                        .fill(InkTheme.accent)
-                                        .frame(width: 18, height: 18)
-                                        .overlay(
-                                            Image(systemName: "checkmark")
-                                                .font(.system(size: 10, weight: .bold))
-                                                .foregroundColor(.white)
-                                        )
-                                        .offset(x: 4, y: -4)
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 4)
-                }
-                .frame(maxHeight: 80)
-                .modifier(EntranceModifier(shown: appeared, delay: 0.22, reduceMotion: reduceMotion))
+                GlyphGrid(results: results)
+                    .modifier(EntranceModifier(shown: appeared, delay: 0.22, reduceMotion: reduceMotion))
 
                 // Stats Grid
-                HStack(spacing: 24) {
-                    VStack(spacing: 4) {
-                        Text("\(totalWritten)")
-                            .font(.inkSerif(size: 32, weight: .bold))
-                            .foregroundColor(InkTheme.ink)
-                        Text("written")
-                            .font(.inkSans(size: 12))
-                            .foregroundColor(InkTheme.ink2)
-                    }
-                    .frame(width: 90)
-
-                    VStack(spacing: 4) {
-                        Text("\(flawlessCount)")
-                            .font(.inkSerif(size: 32, weight: .bold))
-                            .foregroundColor(InkTheme.ink)
-                        Text("flawless")
-                            .font(.inkSans(size: 12))
-                            .foregroundColor(InkTheme.ink2)
-                    }
-                    .frame(width: 90)
-
-                    VStack(spacing: 4) {
-                        HStack(spacing: 0) {
-                            Text("\(accuracyPct)")
-                                .font(.inkSerif(size: 32, weight: .bold))
-                            Text("%")
-                                .font(.inkSerif(size: 18, weight: .bold))
-                        }
-                        .foregroundColor(InkTheme.ink)
-                        Text("first-try")
-                            .font(.inkSans(size: 12))
-                            .foregroundColor(InkTheme.ink2)
-                    }
-                    .frame(width: 90)
-
-                    VStack(spacing: 4) {
-                        Text("\(totalMistakes)")
-                            .font(.inkSerif(size: 32, weight: .bold))
-                            .foregroundColor(InkTheme.ink)
-                        Text("corrections")
-                            .font(.inkSans(size: 12))
-                            .foregroundColor(InkTheme.ink2)
-                    }
-                    .frame(width: 90)
-                }
-                .padding(.vertical, 12)
-                .modifier(EntranceModifier(shown: appeared, delay: 0.3, reduceMotion: reduceMotion))
+                StatsGrid(totalWritten: totalWritten, flawlessCount: flawlessCount, accuracyPct: accuracyPct, totalMistakes: totalMistakes)
+                    .modifier(EntranceModifier(shown: appeared, delay: 0.3, reduceMotion: reduceMotion))
 
                 HStack(spacing: 8) {
                     Image(systemName: "flame.fill")
@@ -141,34 +63,8 @@ struct SessionCompleteView: View {
                 .font(.inkSans(size: 14))
                 .modifier(EntranceModifier(shown: appeared, delay: 0.38, reduceMotion: reduceMotion))
 
-                HStack(spacing: 16) {
-                    Button(action: onAgain) {
-                        Text("Practice again")
-                            .font(.inkSans(size: 16, weight: .bold))
-                            .foregroundColor(InkTheme.onInk)
-                            .frame(width: 200, height: 50)
-                            .background(InkTheme.ink)
-                            .cornerRadius(12)
-                    }
-                    .buttonStyle(InkPressButtonStyle())
-                    .accessibilityLabel("Practice again")
-
-                    Button(action: onHome) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "house.fill")
-                                .font(.system(size: 14))
-                            Text("Library")
-                                .font(.inkSans(size: 16, weight: .semibold))
-                        }
-                        .foregroundColor(InkTheme.ink)
-                        .frame(width: 140, height: 50)
-                        .background(InkTheme.line2)
-                        .cornerRadius(12)
-                    }
-                    .buttonStyle(InkPressButtonStyle())
-                    .accessibilityLabel("Return to Library")
-                }
-                .modifier(EntranceModifier(shown: appeared, delay: 0.46, reduceMotion: reduceMotion))
+                ActionButtons(onAgain: onAgain, onHome: onHome)
+                    .modifier(EntranceModifier(shown: appeared, delay: 0.46, reduceMotion: reduceMotion))
             }
             .padding(40)
             .frame(width: 560)
@@ -180,6 +76,127 @@ struct SessionCompleteView: View {
         .onAppear {
             appeared = true
             SoundEffects.shared.play(.sessionComplete)
+        }
+    }
+}
+
+private struct GlyphGrid: View {
+    let results: [SessionResultItem]
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(Array(results.enumerated()), id: \.offset) { _, item in
+                    ZStack(alignment: .topTrailing) {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(item.skipped ? InkTheme.line2 : (item.mistakes == 0 ? InkTheme.accent.opacity(0.08) : InkTheme.card))
+                            .frame(width: 64, height: 64)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(item.mistakes == 0 && !item.skipped ? InkTheme.accent : InkTheme.line, lineWidth: item.mistakes == 0 && !item.skipped ? 2 : 1)
+                            )
+
+                        Text(item.glyph)
+                            .font(.inkSerif(size: 30))
+                            .foregroundColor(item.skipped ? InkTheme.ink3 : InkTheme.ink)
+                            .frame(width: 64, height: 64)
+
+                        if item.mistakes == 0 && !item.skipped {
+                            Circle()
+                                .fill(InkTheme.accent)
+                                .frame(width: 18, height: 18)
+                                .overlay(
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(.white)
+                                )
+                                .offset(x: 4, y: -4)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
+        }
+        .frame(maxHeight: 80)
+    }
+}
+
+private struct StatView: View {
+    let value: String
+    let label: String
+    var isPercentage: Bool = false
+
+    var body: some View {
+        VStack(spacing: 4) {
+            if isPercentage {
+                HStack(spacing: 0) {
+                    Text(value)
+                        .font(.inkSerif(size: 32, weight: .bold))
+                    Text("%")
+                        .font(.inkSerif(size: 18, weight: .bold))
+                }
+                .foregroundColor(InkTheme.ink)
+            } else {
+                Text(value)
+                    .font(.inkSerif(size: 32, weight: .bold))
+                    .foregroundColor(InkTheme.ink)
+            }
+            Text(label)
+                .font(.inkSans(size: 12))
+                .foregroundColor(InkTheme.ink2)
+        }
+        .frame(width: 90)
+    }
+}
+
+private struct StatsGrid: View {
+    let totalWritten: Int
+    let flawlessCount: Int
+    let accuracyPct: Int
+    let totalMistakes: Int
+
+    var body: some View {
+        HStack(spacing: 24) {
+            StatView(value: "\(totalWritten)", label: "written")
+            StatView(value: "\(flawlessCount)", label: "flawless")
+            StatView(value: "\(accuracyPct)", label: "first-try", isPercentage: true)
+            StatView(value: "\(totalMistakes)", label: "corrections")
+        }
+        .padding(.vertical, 12)
+    }
+}
+
+private struct ActionButtons: View {
+    let onAgain: () -> Void
+    let onHome: () -> Void
+
+    var body: some View {
+        HStack(spacing: 16) {
+            Button(action: onAgain) {
+                Text("Practice again")
+                    .font(.inkSans(size: 16, weight: .bold))
+                    .foregroundColor(InkTheme.onInk)
+                    .frame(width: 200, height: 50)
+                    .background(InkTheme.ink)
+                    .cornerRadius(12)
+            }
+            .buttonStyle(InkPressButtonStyle())
+            .accessibilityLabel("Practice again")
+
+            Button(action: onHome) {
+                HStack(spacing: 6) {
+                    Image(systemName: "house.fill")
+                        .font(.system(size: 14))
+                    Text("Library")
+                        .font(.inkSans(size: 16, weight: .semibold))
+                }
+                .foregroundColor(InkTheme.ink)
+                .frame(width: 140, height: 50)
+                .background(InkTheme.line2)
+                .cornerRadius(12)
+            }
+            .buttonStyle(InkPressButtonStyle())
+            .accessibilityLabel("Return to Library")
         }
     }
 }
