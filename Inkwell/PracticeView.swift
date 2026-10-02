@@ -35,6 +35,7 @@ struct PracticeView: View {
     @State private var expectedIndex: Int = 0          // next stroke the user must write
     @State private var missesOnCurrentStroke: Int = 0  // misses since the last correct stroke
     @State private var hintIndex: Int? = nil           // stroke highlighted as a hint
+    @State private var transformedMedians: [[CGPoint]]? = nil // cached mapping of reference medians
     @State private var demoIndex: Int? = nil           // stroke highlighted by "Show stroke order"
     @State private var feedback: String? = nil         // transient correction message
     @State private var demoTask: Task<Void, Never>? = nil
@@ -502,7 +503,11 @@ struct PracticeView: View {
         guard let data = strokeData, expectedIndex < data.medians.count else { return }
 
         let userBox = canvasPoints.map { metrics.boxPoint(canvas: $0) }
-        let expectedMedian = data.medians[expectedIndex].map { metrics.boxPoint($0) }
+
+        if transformedMedians == nil {
+            transformedMedians = data.medians.map { stroke in stroke.map { metrics.boxPoint($0) } }
+        }
+        let expectedMedian = transformedMedians![expectedIndex]
 
         var config = StrokeGrader.Config()
         config.leniency = leniency
@@ -523,7 +528,7 @@ struct PracticeView: View {
 
         case .wrongStroke:
             let feedbackMessage: String
-            if let other = matchesAnotherStroke(userBox, data: data) {
+            if let other = matchesAnotherStroke(userBox, medians: transformedMedians!) {
                 feedbackMessage = "Out of order — that looks like stroke \(other + 1). Write stroke \(expectedIndex + 1) first."
             } else {
                 feedbackMessage = "Not quite — try stroke \(expectedIndex + 1) again."
@@ -563,11 +568,11 @@ struct PracticeView: View {
     }
 
     /// Does the user's stroke actually match a different stroke of this glyph?
-    private func matchesAnotherStroke(_ userBox: [CGPoint], data: CharacterStrokeData) -> Int? {
+    private func matchesAnotherStroke(_ userBox: [CGPoint], medians: [[CGPoint]]) -> Int? {
         var config = StrokeGrader.Config()
         config.leniency = leniency
-        for index in data.medians.indices where index != expectedIndex {
-            let median = data.medians[index].map { metrics.boxPoint($0) }
+        for index in medians.indices where index != expectedIndex {
+            let median = medians[index]
             if StrokeGrader.judge(user: userBox, median: median, config: config) == .correct {
                 return index
             }
@@ -624,6 +629,7 @@ struct PracticeView: View {
     private func setupCharacter() {
         demoTask?.cancel()
         demoIndex = nil
+        transformedMedians = nil
         canvasView.drawing = PKDrawing()
         expectedIndex = 0
         missesOnCurrentStroke = 0
