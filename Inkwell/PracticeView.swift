@@ -93,7 +93,7 @@ struct PracticeView: View {
 
             // Stats / done card is centered on the screen as well.
             statsCard
-                .frame(width: 460)
+                .frame(width: InkTheme.statsCardWidth)
                 .padding(.bottom, 20)
         }
         .background(InkTheme.paper.ignoresSafeArea())
