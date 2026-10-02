@@ -27,6 +27,9 @@ final class StrokeReference {
 
     private init() {
         openDatabase()
+        Task.detached(priority: .background) {
+            IDSDecomposer.preload()
+        }
     }
 
     deinit {

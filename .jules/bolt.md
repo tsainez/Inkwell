@@ -14,3 +14,6 @@
 ## 2024-05-24 - [Caching Computed Properties in SwiftUI]
 **Learning:** [Computed properties in Swift, such as array-to-dictionary transformations, re-execute entirely on every access. Inside a `LazyVStack` and `ForEach`, accessing a computed property (like `progressMap`) repeatedly for every row as it comes on-screen can result in that property being re-evaluated N times. This can turn O(1) lookups into O(N) operations inside loops, leading to O(N^2) rendering bottlenecks.]
 **Action:** [Cache computationally expensive computed properties into a local variable before using them inside a `ForEach` or `LazyVStack`. This prevents O(N) properties from being continuously re-evaluated.]
+## 2024-05-18 - Lazy initialization blocking main thread
+**Learning:** Lazy static properties can block the main thread if they involve expensive I/O operations (like decoding large JSON files) and are first accessed on the main thread.
+**Action:** Extract the initialization logic or access the property from a detached background task early in the application lifecycle.
