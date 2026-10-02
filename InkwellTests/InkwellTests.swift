@@ -767,3 +767,87 @@ struct DesignTokenTests {
         #expect(deck("anything-else").accentColor == "#c8492f")
     }
 }
+
+// MARK: - CharacterDeck Codable
+
+struct CharacterDeckCodableTests {
+
+    @Test func decodesFromValidJSON() throws {
+        let json = """
+        {
+            "id": "test-1",
+            "lang": "ja",
+            "script": "Japanese",
+            "level": "N5",
+            "title": "Test Deck",
+            "blurb": "A test blurb",
+            "accentName": "sun",
+            "chars": []
+        }
+        """.data(using: .utf8)!
+
+        let deck = try JSONDecoder().decode(CharacterDeck.self, from: json)
+        #expect(deck.id == "test-1")
+        #expect(deck.lang == .japanese)
+        #expect(deck.title == "Test Deck")
+    }
+
+    @Test func decodeFailsOnMissingKey() {
+        let json = """
+        {
+            "id": "test-1",
+            "lang": "ja",
+            "script": "Japanese",
+            "level": "N5",
+            "title": "Test Deck",
+            "blurb": "A test blurb",
+            "accentName": "sun"
+        }
+        """.data(using: .utf8)!
+
+        #expect(throws: DecodingError.self) {
+            _ = try JSONDecoder().decode(CharacterDeck.self, from: json)
+        }
+    }
+
+    @Test func decodeFailsOnInvalidEnumValue() {
+        let json = """
+        {
+            "id": "test-1",
+            "lang": "invalid-lang",
+            "script": "Japanese",
+            "level": "N5",
+            "title": "Test Deck",
+            "blurb": "A test blurb",
+            "accentName": "sun",
+            "chars": []
+        }
+        """.data(using: .utf8)!
+
+        #expect(throws: DecodingError.self) {
+            _ = try JSONDecoder().decode(CharacterDeck.self, from: json)
+        }
+    }
+
+    @Test func encodeDecodeRoundTrip() throws {
+        let original = CharacterDeck(
+            id: "round-trip-id",
+            lang: .chinese,
+            script: "Chinese",
+            level: "HSK 1",
+            title: "Round Trip",
+            blurb: "Blurb",
+            accentName: "jade",
+            chars: [
+                CharacterItem(glyph: "一", meaning: "one", reading: "yi")
+            ]
+        )
+
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(CharacterDeck.self, from: data)
+
+        #expect(original == decoded)
+        #expect(decoded.chars.count == 1)
+        #expect(decoded.chars.first?.glyph == "一")
+    }
+}
